@@ -16,34 +16,34 @@ const Navbar = () => {
           </div>
           <nav className="hidden md:flex space-x-8">
             <Link 
-              to="/api-features" 
+              to="/" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
-              API Features
+              Dashboard
             </Link>
             <Link 
-              to="/agents-sdk" 
+              to="/rfts" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
-              Agents SDK
+              RFT Tasks
             </Link>
             <Link 
-              to="/architecture" 
+              to="/dms" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
-              Architecture
+              DMS
             </Link>
             <Link 
-              to="/best-practices" 
+              to="/reports" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
-              Best Practices
+              Reports
             </Link>
             <Link 
-              to="/integration" 
+              to="/admin" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
-              Lovable Integration
+              Admin
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
