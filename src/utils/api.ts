@@ -1,7 +1,7 @@
 
 const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE || "";
 
-export async function fetchJson<T>(
+export async function fetchJson<T = any>(
   path: string,
   options?: RequestInit
 ): Promise<T> {

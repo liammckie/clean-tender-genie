@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { fetchJson } from "@/utils/api";
 import { Loader } from "lucide-react";
 
+interface GenerateResponse {
+  taskId: string;
+  status: string;
+}
+
 const RftTasksDashboard = () => {
   const { storeId, status, error } = useAppStore();
   const { toast } = useToast();
@@ -18,7 +23,7 @@ const RftTasksDashboard = () => {
     
     setGenerating(true);
     try {
-      const result = await fetchJson("/api/generate", {
+      const result = await fetchJson<GenerateResponse>("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ storeId }),
