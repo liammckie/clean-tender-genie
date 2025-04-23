@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'; // Add this import for the DOM matchers
+import '@testing-library/jest-dom';
 import { FileUploader } from './FileUploader';
 import { useAppStore } from '@/hooks/useAppStore';
 
@@ -14,6 +14,13 @@ vi.mock('node:fetch', () => ({
 vi.mock('@/hooks/useAppStore', () => ({
   useAppStore: vi.fn(),
 }));
+
+describe('FileUploader minimal render', () => {
+  it('renders the file uploader root', () => {
+    render(<FileUploader />);
+    expect(screen.getByTestId('file-uploader')).toBeInTheDocument();
+  });
+});
 
 describe('FileUploader', () => {
   const mockSetStatus = vi.fn();

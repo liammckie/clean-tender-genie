@@ -106,7 +106,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploaded }) => {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto" data-testid="file-uploader">
       {status === 'uploaded' ? (
         <div className="border rounded-lg p-6 bg-green-50 dark:bg-green-900/20 flex justify-between items-center">
           <div className="flex items-center gap-2">
