@@ -1,7 +1,6 @@
-
 import { create } from 'zustand';
 
-type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
+type UploadStatus = 'idle' | 'uploading' | 'uploaded' | 'error';
 
 interface AppState {
   storeId: string | null;
@@ -14,7 +13,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   storeId: null,
-  status: "idle",
+  status: 'idle',
   error: null,
   setStatus: (status) => set({ status }),
   setStoreId: (storeId) => set({ storeId }),

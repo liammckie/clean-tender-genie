@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -11,8 +10,8 @@ const NotFound = () => {
         <p className="text-gray-600 mb-8 text-center">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
         >
           Return to Home

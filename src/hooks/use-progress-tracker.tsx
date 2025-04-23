@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 interface ProgressTracking {
@@ -12,7 +11,7 @@ export function useProgressTracker() {
   });
 
   const markPageVisited = (path: string) => {
-    setVisitedPages(prev => {
+    setVisitedPages((prev) => {
       const updated = { ...prev, [path]: true };
       localStorage.setItem('knowledge_progress', JSON.stringify(updated));
       return updated;
@@ -21,7 +20,7 @@ export function useProgressTracker() {
 
   const getProgress = (paths: string[]) => {
     if (paths.length === 0) return 0;
-    const visitedCount = paths.filter(path => visitedPages[path]).length;
+    const visitedCount = paths.filter((path) => visitedPages[path]).length;
     return (visitedCount / paths.length) * 100;
   };
 
@@ -34,6 +33,6 @@ export function useProgressTracker() {
     visitedPages,
     markPageVisited,
     getProgress,
-    resetProgress
+    resetProgress,
   };
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
@@ -10,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
 interface NavItem {
   title: string;
@@ -28,7 +27,7 @@ const navItems: NavItem[] = [
       { title: 'Tools', path: '/api-features/tools' },
       { title: 'Vector Stores', path: '/api-features/vector-stores' },
       { title: 'Guardrails', path: '/api-features/guardrails' },
-    ]
+    ],
   },
   {
     title: 'Agents SDK',
@@ -39,16 +38,19 @@ const navItems: NavItem[] = [
       { title: 'Runner Class', path: '/agents-sdk/runner-class' },
       { title: 'Function Tools', path: '/agents-sdk/function-tools' },
       { title: 'Handoffs', path: '/agents-sdk/handoffs' },
-    ]
+    ],
   },
   {
     title: 'Architecture',
     path: '/architecture',
     children: [
       { title: 'System Overview', path: '/architecture/overview' },
-      { title: 'Tender Writing Workflow', path: '/architecture/tender-workflow' },
+      {
+        title: 'Tender Writing Workflow',
+        path: '/architecture/tender-workflow',
+      },
       { title: 'Integration Points', path: '/architecture/integration-points' },
-    ]
+    ],
   },
   {
     title: 'Best Practices',
@@ -59,7 +61,7 @@ const navItems: NavItem[] = [
       { title: 'Error Handling', path: '/best-practices/error-handling' },
       { title: 'Cost Optimization', path: '/best-practices/cost-optimization' },
       { title: 'Testing', path: '/best-practices/testing' },
-    ]
+    ],
   },
   {
     title: 'Lovable Integration',
@@ -69,7 +71,7 @@ const navItems: NavItem[] = [
       { title: 'Backend Integration', path: '/integration/backend' },
       { title: 'Workflow Integration', path: '/integration/workflow' },
       { title: 'Deployment', path: '/integration/deployment' },
-    ]
+    ],
   },
 ];
 

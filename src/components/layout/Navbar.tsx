@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
@@ -11,36 +10,38 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-primary dark:text-primary">OpenAI Knowledge Base</h1>
+              <h1 className="text-xl font-bold text-primary dark:text-primary">
+                OpenAI Knowledge Base
+              </h1>
             </Link>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               Dashboard
             </Link>
-            <Link 
-              to="/rfts" 
+            <Link
+              to="/rfts"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               RFT Tasks
             </Link>
-            <Link 
-              to="/dms" 
+            <Link
+              to="/dms"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               DMS
             </Link>
-            <Link 
-              to="/reports" 
+            <Link
+              to="/reports"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               Reports
             </Link>
-            <Link 
-              to="/admin" 
+            <Link
+              to="/admin"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               Admin

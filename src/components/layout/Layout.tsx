@@ -1,6 +1,9 @@
-
 import React from 'react';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 

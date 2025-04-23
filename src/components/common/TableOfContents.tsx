@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 interface TocItem {
@@ -23,8 +22,9 @@ const TableOfContents: React.FC = () => {
     setHeadings(headingElements);
 
     const handleScroll = () => {
-      const headingElements = Array.from(document.querySelectorAll('h2, h3, h4'))
-        .filter((element) => element.id);
+      const headingElements = Array.from(
+        document.querySelectorAll('h2, h3, h4')
+      ).filter((element) => element.id);
 
       // Find the heading that is currently at the top of the viewport
       const currentHeading = headingElements.find((heading) => {
@@ -52,7 +52,7 @@ const TableOfContents: React.FC = () => {
       <h4 className="text-sm font-semibold text-gray-900 mb-4">On This Page</h4>
       <ul className="space-y-2 text-sm">
         {headings.map((heading) => (
-          <li 
+          <li
             key={heading.id}
             style={{ paddingLeft: `${(heading.level - 2) * 0.75}rem` }}
           >
@@ -61,7 +61,9 @@ const TableOfContents: React.FC = () => {
               className={`block py-1 hover:text-primary transition-colors ${activeId === heading.id ? 'text-primary font-medium' : 'text-gray-600'}`}
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
+                document
+                  .getElementById(heading.id)
+                  ?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               {heading.text}
