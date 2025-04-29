@@ -49,8 +49,8 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
     try {
       const response = await googleDriveService.listFiles(folderId);
       
-      // Filter files based on props
-      let filteredFiles = response.files;
+      // Initialize filtered files with an empty array if response.files is undefined
+      let filteredFiles = response.files || [];
       
       if (onlyFolders) {
         filteredFiles = filteredFiles.filter(file => isFolder(file));
@@ -76,6 +76,8 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
         description: err.message || 'Failed to load files from Google Drive',
         variant: 'destructive',
       });
+      // Set files to empty array on error to prevent undefined access
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -211,11 +213,11 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
                           </>
                         )}
                         
-                        {!isFolder(file) && (
+                        {!isFolder(file) && file.mimeType && (
                           <>
                             <span>•</span>
                             <Badge variant="outline" className="h-5 px-1">
-                              {file.mimeType.split('/').pop()?.toUpperCase()}
+                              {file.mimeType.split('/').pop()?.toUpperCase() || 'FILE'}
                             </Badge>
                           </>
                         )}
