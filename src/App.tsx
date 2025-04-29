@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -14,6 +15,7 @@ import IndividualRftTaskView from './pages/IndividualRftTaskView';
 import DmsRouter from './pages/DmsRouter';
 import AdminRouter from './pages/AdminRouter';
 import Reports from './pages/Reports';
+import GoogleDriveTest from './pages/GoogleDriveTest';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,7 @@ const App = () => (
             <Route path="/dms/*" element={<DmsRouter />} />
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/google-drive-test" element={<GoogleDriveTest />} />
             <Route path="/api-features" element={<APIFeatures />} />
             <Route path="/agents-sdk" element={<AgentsSDK />} />
             <Route path="*" element={<NotFound />} />
