@@ -2,3 +2,5 @@
 project_id = "hlwcxtvfncrmyqisbyrx"
 [functions.test-google-drive]
 verify_jwt = false
+[functions.google-drive]
+verify_jwt = false
