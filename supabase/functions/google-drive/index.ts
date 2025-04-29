@@ -15,28 +15,28 @@ serve(async (req) => {
   }
 
   try {
-    // Get the service role key from environment variables
-    const serviceRoleKey = Deno.env.get('serice-ROLE'); // Note: using the key with the typo as stored
+    // Get the service account key from environment variables
+    const serviceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT');
     
-    if (!serviceRoleKey) {
-      throw new Error('Google Drive service role key not found in environment variables');
+    if (!serviceAccountKey) {
+      throw new Error('Google Drive service account key not found in environment variables');
     }
 
-    // Parse the JWT to get credentials
+    // Parse the service account JSON
     let credentials;
     try {
-      credentials = JSON.parse(atob(serviceRoleKey.split('.')[1]));
-    } catch (e) {
-      console.error('Error parsing service key JWT:', e);
-      throw new Error('Invalid service key format');
+      credentials = JSON.parse(serviceAccountKey);
+    } catch (parseError) {
+      console.error('Error parsing service account key:', parseError);
+      throw new Error('Invalid service account key format: not valid JSON');
     }
 
-    // Create a Google auth client using the service key
+    // Create a Google auth client using the service account credentials
     const auth = new google.auth.JWT(
       credentials.client_email,
       null,
       credentials.private_key,
-      ['https://www.googleapis.com/auth/drive.readonly']
+      ['https://www.googleapis.com/auth/drive']
     );
 
     // Initialize the Google Drive API client

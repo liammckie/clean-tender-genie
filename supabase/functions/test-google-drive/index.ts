@@ -14,46 +14,46 @@ serve(async (req) => {
   }
 
   try {
-    // Get the service role key from environment variables
-    const serviceRoleKey = Deno.env.get('serice-ROLE'); // Note: using the key with the typo as stored
+    // Get the service account key from environment variables
+    const serviceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT');
     
-    if (!serviceRoleKey) {
-      throw new Error('Google Drive service role key not found in environment variables');
+    if (!serviceAccountKey) {
+      throw new Error('Google Drive service account key not found in environment variables');
     }
 
-    // Log information about the key (sanitized for security)
-    const keyInfo = {
-      keyExists: !!serviceRoleKey,
-      keyLength: serviceRoleKey.length,
-      keyPrefix: serviceRoleKey.substring(0, 10) + '...',
-    };
+    let serviceAccountJson;
+    try {
+      // Parse the service account key as JSON
+      serviceAccountJson = JSON.parse(serviceAccountKey);
+      
+      // Log information about the key (sanitized for security)
+      const keyInfo = {
+        keyExists: true,
+        type: serviceAccountJson.type,
+        projectId: serviceAccountJson.project_id,
+        clientEmail: serviceAccountJson.client_email,
+        privateKeyExists: !!serviceAccountJson.private_key,
+      };
 
-    console.log('Service key information:', keyInfo);
-    
-    // Test basic JWT parsing if it appears to be a JWT token
-    let tokenParts = null;
-    if (serviceRoleKey.includes('.')) {
-      try {
-        tokenParts = serviceRoleKey.split('.').length;
-      } catch (e) {
-        console.error('Error parsing JWT token:', e);
-      }
+      console.log('Service account key information:', keyInfo);
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Service account key found and valid',
+          keyInfo,
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    } catch (parseError) {
+      console.error('Error parsing service account key as JSON:', parseError);
+      throw new Error('Invalid service account key format: not valid JSON');
     }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Service role key found',
-        keyInfo,
-        tokenParts,
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    );
   } catch (error) {
-    console.error('Error testing Google Drive service role key:', error);
+    console.error('Error testing Google Drive service account key:', error);
     
     return new Response(
       JSON.stringify({
