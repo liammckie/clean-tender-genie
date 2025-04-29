@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { googleDriveService, GoogleDriveFile } from '@/services/googleDriveService';
-import { Folder, File, ChevronRight, Download, Eye, ArrowLeft } from 'lucide-react';
+import { Folder, File, ChevronRight, Download, Eye, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbList } from '@/components/ui/breadcrumb';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface GoogleDriveBrowserProps {
   initialFolderId?: string;
@@ -40,37 +41,50 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
   const [currentFolder, setCurrentFolder] = useState<string>(initialFolderId);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [detailedError, setDetailedError] = useState<any>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ id: initialFolderId, name: 'Root' }]);
   const { toast } = useToast();
 
   const loadFiles = async (folderId: string) => {
+    console.log(`Loading files from folder: ${folderId}`);
     setLoading(true);
     setError(null);
+    setDetailedError(null);
+    
     try {
       const response = await googleDriveService.listFiles(folderId);
+      console.log('Files loaded successfully:', response);
       
       // Initialize filtered files with an empty array if response.files is undefined
       let filteredFiles = response.files || [];
+      console.log(`Got ${filteredFiles.length} files before filtering`);
       
       if (onlyFolders) {
         filteredFiles = filteredFiles.filter(file => isFolder(file));
+        console.log(`After folder filter: ${filteredFiles.length} files`);
       } else if (onlyFiles) {
         filteredFiles = filteredFiles.filter(file => !isFolder(file));
+        console.log(`After file filter: ${filteredFiles.length} files`);
       }
       
       if (allowedMimeTypes && allowedMimeTypes.length > 0) {
-        filteredFiles = filteredFiles.filter(file => 
-          allowedMimeTypes.some(mimeType => 
+        filteredFiles = filteredFiles.filter(file => {
+          // Safety check for file.mimeType
+          if (!file.mimeType) return isFolder(file); // Keep folders or treat undefined as allowed
+          
+          return allowedMimeTypes.some(mimeType => 
             file.mimeType === mimeType || file.mimeType.startsWith(mimeType + '.')
-          ) || isFolder(file) // Always keep folders
-        );
+          ) || isFolder(file); // Always keep folders
+        });
+        console.log(`After mime type filter: ${filteredFiles.length} files`);
       }
       
       setFiles(filteredFiles);
-      setCurrentFolder(response.currentFolderId);
+      setCurrentFolder(response.currentFolderId || folderId);
     } catch (err: any) {
       console.error('Error loading files:', err);
       setError(err.message || 'Failed to load files from Google Drive');
+      setDetailedError(err);
       toast({
         title: 'Error loading files',
         description: err.message || 'Failed to load files from Google Drive',
@@ -114,7 +128,12 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
     }
   };
 
+  const retryLoading = () => {
+    loadFiles(currentFolder);
+  };
+
   useEffect(() => {
+    console.log(`Initial loading of files from ${initialFolderId}`);
     loadFiles(initialFolderId);
   }, [initialFolderId]);
 
@@ -136,17 +155,42 @@ const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
           </BreadcrumbList>
         </Breadcrumb>
 
-        {breadcrumbs.length > 1 && (
-          <Button variant="outline" size="sm" onClick={navigateUp}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Up
+        <div className="flex gap-2">
+          {breadcrumbs.length > 1 && (
+            <Button variant="outline" size="sm" onClick={navigateUp}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Up
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={retryLoading} disabled={loading}>
+            {loading ? 'Loading...' : 'Refresh'}
           </Button>
-        )}
+        </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error loading files</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>{error}</p>
+            {detailedError && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-sm">Show technical details</summary>
+                <pre className="mt-2 whitespace-pre-wrap text-xs p-2 bg-gray-100 dark:bg-gray-900 rounded-md overflow-auto max-h-[200px]">
+                  {JSON.stringify(detailedError, null, 2)}
+                </pre>
+              </details>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={retryLoading}
+              className="mt-2"
+            >
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

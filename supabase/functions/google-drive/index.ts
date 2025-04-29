@@ -19,6 +19,7 @@ serve(async (req) => {
     const serviceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT');
     
     if (!serviceAccountKey) {
+      console.error('Google Drive service account key not found in environment variables');
       throw new Error('Google Drive service account key not found in environment variables');
     }
 
@@ -26,6 +27,7 @@ serve(async (req) => {
     let credentials;
     try {
       credentials = JSON.parse(serviceAccountKey);
+      console.log('Service account credentials parsed successfully');
     } catch (parseError) {
       console.error('Error parsing service account key:', parseError);
       throw new Error('Invalid service account key format: not valid JSON');
@@ -43,7 +45,10 @@ serve(async (req) => {
     const drive = google.drive({ version: 'v3', auth });
     
     // Parse the request body to determine the action
-    const { action, folderId, fileId, fileName } = await req.json();
+    const requestData = await req.json();
+    console.log('Request action:', requestData.action);
+    
+    const { action, folderId, fileId, fileName, content } = requestData;
     
     let result = null;
     
@@ -55,17 +60,31 @@ serve(async (req) => {
         
         console.log(`Listing files in folder: ${targetFolderId}`);
         
-        // Query for files and folders in the specified folder
-        const response = await drive.files.list({
-          q: `'${targetFolderId}' in parents and trashed = false`,
-          fields: 'files(id, name, mimeType, createdTime, modifiedTime, size, webViewLink)',
-          orderBy: 'folder,name'
-        });
-        
-        result = {
-          files: response.data.files,
-          currentFolderId: targetFolderId
-        };
+        try {
+          // Query for files and folders in the specified folder
+          const response = await drive.files.list({
+            q: `'${targetFolderId}' in parents and trashed = false`,
+            fields: 'files(id, name, mimeType, createdTime, modifiedTime, size, webViewLink)',
+            orderBy: 'folder,name'
+          });
+          
+          console.log('Files list response:', {
+            status: response.status,
+            fileCount: response.data.files?.length || 0
+          });
+          
+          if (!response.data.files || response.data.files.length === 0) {
+            console.log('No files found in the specified folder');
+          }
+          
+          result = {
+            files: response.data.files || [],
+            currentFolderId: targetFolderId
+          };
+        } catch (listError) {
+          console.error('Error listing files:', listError);
+          throw new Error(`Failed to list files: ${listError.message}`);
+        }
         break;
       }
       
@@ -74,12 +93,24 @@ serve(async (req) => {
           throw new Error('fileId is required for getFileMetadata action');
         }
         
-        const response = await drive.files.get({
-          fileId: fileId,
-          fields: 'id, name, mimeType, createdTime, modifiedTime, size, webViewLink, parents'
-        });
+        console.log(`Getting metadata for file: ${fileId}`);
         
-        result = response.data;
+        try {
+          const response = await drive.files.get({
+            fileId: fileId,
+            fields: 'id, name, mimeType, createdTime, modifiedTime, size, webViewLink, parents'
+          });
+          
+          console.log('File metadata response:', {
+            status: response.status,
+            fileName: response.data.name
+          });
+          
+          result = response.data;
+        } catch (metadataError) {
+          console.error('Error getting file metadata:', metadataError);
+          throw new Error(`Failed to get file metadata: ${metadataError.message}`);
+        }
         break;
       }
       
@@ -88,27 +119,40 @@ serve(async (req) => {
           throw new Error('fileId is required for downloadFile action');
         }
         
-        // Get file metadata to check its type
-        const fileMetadata = await drive.files.get({
-          fileId: fileId,
-          fields: 'id, name, mimeType'
-        });
+        console.log(`Downloading file: ${fileId}`);
         
-        // Download the file content
-        const response = await drive.files.get({
-          fileId: fileId,
-          alt: 'media'
-        }, { responseType: 'arraybuffer' });
-        
-        // Convert the file content to base64
-        const content = btoa(String.fromCharCode(...new Uint8Array(response.data)));
-        
-        result = {
-          id: fileId,
-          name: fileMetadata.data.name,
-          mimeType: fileMetadata.data.mimeType,
-          content: content
-        };
+        try {
+          // Get file metadata to check its type
+          const fileMetadata = await drive.files.get({
+            fileId: fileId,
+            fields: 'id, name, mimeType'
+          });
+          
+          // Download the file content
+          const response = await drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+          }, { responseType: 'arraybuffer' });
+          
+          console.log('File download response:', {
+            status: response.status,
+            fileName: fileMetadata.data.name,
+            contentSize: response.data.byteLength
+          });
+          
+          // Convert the file content to base64
+          const content = btoa(String.fromCharCode(...new Uint8Array(response.data)));
+          
+          result = {
+            id: fileId,
+            name: fileMetadata.data.name,
+            mimeType: fileMetadata.data.mimeType,
+            content: content
+          };
+        } catch (downloadError) {
+          console.error('Error downloading file:', downloadError);
+          throw new Error(`Failed to download file: ${downloadError.message}`);
+        }
         break;
       }
       
@@ -117,19 +161,32 @@ serve(async (req) => {
           throw new Error('fileName is required for createGoogleDoc action');
         }
         
-        // Create a new Google Doc
-        const fileMetadata = {
-          name: fileName,
-          mimeType: 'application/vnd.google-apps.document',
-          parents: folderId ? [folderId] : ['1ULtJBBqNdJXHadeW0RfBpvYqRvV2VOTi']
-        };
+        console.log(`Creating Google Doc: ${fileName} in folder: ${folderId || 'default'}`);
         
-        const response = await drive.files.create({
-          requestBody: fileMetadata,
-          fields: 'id, name, webViewLink'
-        });
-        
-        result = response.data;
+        try {
+          // Create a new Google Doc
+          const fileMetadata = {
+            name: fileName,
+            mimeType: 'application/vnd.google-apps.document',
+            parents: folderId ? [folderId] : ['1ULtJBBqNdJXHadeW0RfBpvYqRvV2VOTi']
+          };
+          
+          const response = await drive.files.create({
+            requestBody: fileMetadata,
+            fields: 'id, name, webViewLink'
+          });
+          
+          console.log('Google Doc creation response:', {
+            status: response.status,
+            fileId: response.data.id,
+            fileName: response.data.name
+          });
+          
+          result = response.data;
+        } catch (createError) {
+          console.error('Error creating Google Doc:', createError);
+          throw new Error(`Failed to create Google Doc: ${createError.message}`);
+        }
         break;
       }
 
@@ -138,26 +195,38 @@ serve(async (req) => {
           throw new Error('fileId is required for updateGoogleDoc action');
         }
         
-        const { content } = await req.json();
-        
         if (!content) {
           throw new Error('content is required for updateGoogleDoc action');
         }
         
-        // Update the Google Doc content
-        const response = await drive.files.update({
-          fileId: fileId,
-          requestBody: { 
-            content: content
-          },
-          fields: 'id, name, webViewLink'
-        });
+        console.log(`Updating Google Doc: ${fileId}`);
         
-        result = response.data;
+        try {
+          // Update the Google Doc content
+          const response = await drive.files.update({
+            fileId: fileId,
+            requestBody: { 
+              content: content
+            },
+            fields: 'id, name, webViewLink'
+          });
+          
+          console.log('Google Doc update response:', {
+            status: response.status,
+            fileId: response.data.id,
+            fileName: response.data.name
+          });
+          
+          result = response.data;
+        } catch (updateError) {
+          console.error('Error updating Google Doc:', updateError);
+          throw new Error(`Failed to update Google Doc: ${updateError.message}`);
+        }
         break;
       }
       
       default:
+        console.error(`Unknown action: ${action}`);
         throw new Error(`Unknown action: ${action}`);
     }
 

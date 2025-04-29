@@ -26,10 +26,15 @@ const GoogleDriveTest = () => {
     setError(null);
     
     try {
+      console.log('Testing Google Drive connection...');
       const { data, error } = await supabase.functions.invoke('test-google-drive');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
       
+      console.log('Test result:', data);
       setResult(data);
       toast({
         title: 'Test Complete',
