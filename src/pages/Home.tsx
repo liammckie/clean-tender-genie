@@ -1,8 +1,12 @@
 
 import React from 'react';
 import Layout from '../components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
+  
   return (
     <Layout>
       <div className="py-8">
@@ -16,13 +20,31 @@ const Home = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <h2 className="text-xl font-semibold mb-3">Document Editor</h2>
+            <p className="text-gray-600 mb-4">
+              Create and edit documents with AI assistance and team collaboration.
+            </p>
+            <Button 
+              variant="link" 
+              onClick={() => navigate('/document-editor')} 
+              className="text-primary hover:underline font-medium p-0"
+            >
+              Open Editor →
+            </Button>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
             <h2 className="text-xl font-semibold mb-3">RFT Dashboard</h2>
             <p className="text-gray-600 mb-4">
               View and manage all your Request for Tender tasks.
             </p>
-            <a href="/rfts" className="text-primary hover:underline font-medium">
+            <Button 
+              variant="link" 
+              onClick={() => navigate('/rfts')} 
+              className="text-primary hover:underline font-medium p-0"
+            >
               Go to Dashboard →
-            </a>
+            </Button>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
@@ -30,9 +52,13 @@ const Home = () => {
             <p className="text-gray-600 mb-4">
               Access and organize your controlled documents.
             </p>
-            <a href="/dms" className="text-primary hover:underline font-medium">
+            <Button 
+              variant="link" 
+              onClick={() => navigate('/dms')} 
+              className="text-primary hover:underline font-medium p-0"
+            >
               Open DMS →
-            </a>
+            </Button>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
@@ -40,19 +66,13 @@ const Home = () => {
             <p className="text-gray-600 mb-4">
               View analytics and reports about your RFT responses.
             </p>
-            <a href="/reports" className="text-primary hover:underline font-medium">
+            <Button 
+              variant="link" 
+              onClick={() => navigate('/reports')} 
+              className="text-primary hover:underline font-medium p-0"
+            >
               View Reports →
-            </a>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Admin Panel</h2>
-            <p className="text-gray-600 mb-4">
-              Manage system settings and user permissions.
-            </p>
-            <a href="/admin" className="text-primary hover:underline font-medium">
-              Open Admin Panel →
-            </a>
+            </Button>
           </div>
         </div>
       </div>
