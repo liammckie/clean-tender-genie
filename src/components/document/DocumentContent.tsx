@@ -25,12 +25,34 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
     }
   }, [content]);
 
+  // Handle tab key to insert tab character instead of changing focus
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.currentTarget.selectionStart;
+      const end = e.currentTarget.selectionEnd;
+      
+      // Insert tab at cursor position
+      const newText = content.substring(0, start) + '\t' + content.substring(end);
+      setContent(newText);
+      
+      // Reset cursor position after tab insertion
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = start + 1;
+          textareaRef.current.selectionEnd = start + 1;
+        }
+      }, 0);
+    }
+  };
+
   return (
     <div className={cn("bg-white rounded-md shadow-sm p-6 min-h-full", className)}>
       <Textarea
         ref={textareaRef}
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        onKeyDown={handleKeyDown}
         className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[500px] text-base leading-relaxed"
         placeholder="Start writing your document..."
       />

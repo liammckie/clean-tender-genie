@@ -6,14 +6,36 @@ import DocumentEditorToolbar from '@/components/document/DocumentEditorToolbar';
 import DocumentContent from '@/components/document/DocumentContent';
 import ReviewSidebar from '@/components/document/ReviewSidebar';
 import AIAssistantPanel from '@/components/document/AIAssistantPanel';
+import LLMConfigSidebar from '@/components/document/LLMConfigSidebar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Settings } from 'lucide-react';
+
+// Define the LLM provider types
+export type LLMProvider = 'openai' | 'gemini' | 'deepseek';
+export type LLMMode = 'single' | 'agent';
+
+// LLM Configuration type
+export interface LLMConfig {
+  provider: LLMProvider;
+  mode: LLMMode;
+  temperature: number;
+  maxTokens: number;
+}
 
 const DocumentEditor = () => {
   const { id } = useParams();
   const [showReviewSidebar, setShowReviewSidebar] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(false);
+  const [showLLMConfig, setShowLLMConfig] = useState(false);
+  
+  // LLM Configuration state
+  const [llmConfig, setLLMConfig] = useState<LLMConfig>({
+    provider: 'openai',
+    mode: 'single',
+    temperature: 0.7,
+    maxTokens: 1000
+  });
   
   // Mock document data - in a real app, fetch this from your backend
   const [documentContent, setDocumentContent] = useState(
@@ -28,6 +50,7 @@ With over 15 years of experience in commercial cleaning, we have established a s
 
   const toggleReviewSidebar = () => setShowReviewSidebar(!showReviewSidebar);
   const toggleAIPanel = () => setShowAIPanel(!showAIPanel);
+  const toggleLLMConfig = () => setShowLLMConfig(!showLLMConfig);
 
   return (
     <Layout>
@@ -35,6 +58,15 @@ With over 15 years of experience in commercial cleaning, we have established a s
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-xl font-semibold">Document Editor: {id || 'New Document'}</h1>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleLLMConfig}
+              className={showLLMConfig ? "bg-secondary" : ""}
+            >
+              <Settings className="h-4 w-4 mr-1" />
+              LLM Config
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -58,6 +90,23 @@ With over 15 years of experience in commercial cleaning, we have established a s
         <DocumentEditorToolbar />
         
         <div className="flex flex-grow overflow-hidden">
+          {showLLMConfig && (
+            <div className="w-64 border-r overflow-auto relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={toggleLLMConfig}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <LLMConfigSidebar 
+                config={llmConfig} 
+                setConfig={setLLMConfig} 
+              />
+            </div>
+          )}
+          
           <div className="flex-grow overflow-auto">
             <DocumentContent 
               content={documentContent} 
@@ -93,6 +142,7 @@ With over 15 years of experience in commercial cleaning, we have established a s
             <AIAssistantPanel 
               documentContent={documentContent}
               setDocumentContent={setDocumentContent}
+              llmConfig={llmConfig}
             />
           </div>
         )}
