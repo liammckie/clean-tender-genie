@@ -5,8 +5,6 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import APIFeatures from './pages/APIFeatures';
-import AgentsSDK from './pages/AgentsSDK';
 import NotFound from './pages/NotFound';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import Dashboard from './pages/Dashboard';
@@ -34,8 +32,6 @@ const App = () => (
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/google-drive-test" element={<GoogleDriveTest />} />
-            <Route path="/api-features" element={<APIFeatures />} />
-            <Route path="/agents-sdk" element={<AgentsSDK />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

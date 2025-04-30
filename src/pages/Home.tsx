@@ -1,5 +1,5 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 
 const Home = () => {
@@ -7,100 +7,52 @@ const Home = () => {
     <Layout>
       <div className="py-8">
         <h1 className="text-4xl font-bold mb-6">
-          OpenAI 2025 Enterprise Integration Knowledge Base
+          RFT Response Generation Assistant
         </h1>
 
         <p className="text-lg mb-8">
-          Welcome to the comprehensive documentation for implementing
-          enterprise-grade OpenAI 2025 agents with Lovable.dev integration. This
-          knowledge base contains detailed information about the OpenAI 2025 API
-          features, the Agents SDK, architecture patterns, best practices, and
-          integration guides.
+          Welcome to the RFT Response Generation Assistant Dashboard. This application helps you manage and generate responses for Request for Tender documents.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">API Features</h2>
+            <h2 className="text-xl font-semibold mb-3">RFT Dashboard</h2>
             <p className="text-gray-600 mb-4">
-              Explore the OpenAI 2025 API landscape including models, pricing,
-              tools, guardrails, and vector stores.
+              View and manage all your Request for Tender tasks.
             </p>
-            <Link
-              to="/api-features"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
+            <a href="/rfts" className="text-primary hover:underline font-medium">
+              Go to Dashboard →
+            </a>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Agents SDK</h2>
+            <h2 className="text-xl font-semibold mb-3">Document Management</h2>
             <p className="text-gray-600 mb-4">
-              Learn how to use the Python Agents SDK including @function_tool,
-              Agent, Runner, and handoffs.
+              Access and organize your controlled documents.
             </p>
-            <Link
-              to="/agents-sdk"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
+            <a href="/dms" className="text-primary hover:underline font-medium">
+              Open DMS →
+            </a>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Architecture</h2>
+            <h2 className="text-xl font-semibold mb-3">Reports</h2>
             <p className="text-gray-600 mb-4">
-              Review reference architectures for building tender-writing agents
-              and other enterprise applications.
+              View analytics and reports about your RFT responses.
             </p>
-            <Link
-              to="/architecture"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
+            <a href="/reports" className="text-primary hover:underline font-medium">
+              View Reports →
+            </a>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Best Practices</h2>
+            <h2 className="text-xl font-semibold mb-3">Admin Panel</h2>
             <p className="text-gray-600 mb-4">
-              Follow enterprise best practices for security, rate limits, error
-              handling, cost optimization, and more.
+              Manage system settings and user permissions.
             </p>
-            <Link
-              to="/best-practices"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Lovable Integration</h2>
-            <p className="text-gray-600 mb-4">
-              Integrate OpenAI agents with Lovable.dev, including frontend
-              components and backend services.
-            </p>
-            <Link
-              to="/integration"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-semibold mb-3">Getting Started</h2>
-            <p className="text-gray-600 mb-4">
-              Follow our step-by-step implementation guide to build your first
-              enterprise-grade agent.
-            </p>
-            <Link
-              to="/getting-started"
-              className="text-primary hover:underline font-medium"
-            >
-              Learn more →
-            </Link>
+            <a href="/admin" className="text-primary hover:underline font-medium">
+              Open Admin Panel →
+            </a>
           </div>
         </div>
       </div>
