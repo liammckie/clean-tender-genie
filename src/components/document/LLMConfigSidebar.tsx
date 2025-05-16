@@ -8,12 +8,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { 
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { 
   Card, 
   CardContent, 
   CardDescription, 
@@ -62,7 +56,7 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
   const getProviderIcon = (provider: string) => {
     switch (provider) {
       case 'openai':
-        return <CircleDot className="h-4 w-4 text-green-500" />;
+        return <CircleDot className="h-4 w-4 text-spotify-green" />;
       case 'gemini':
         return <CircleDot className="h-4 w-4 text-blue-500" />;
       case 'deepseek':
@@ -73,33 +67,33 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
   };
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full p-4 text-white">
       <h2 className="text-lg font-semibold mb-4">LLM Configuration</h2>
       
-      <Card className="mb-4">
+      <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Provider</CardTitle>
-          <CardDescription className="text-xs">Select your LLM provider</CardDescription>
+          <CardTitle className="text-sm text-white">Provider</CardTitle>
+          <CardDescription className="text-xs text-spotify-lightgray">Select your LLM provider</CardDescription>
         </CardHeader>
         <CardContent>
           <Select value={config.provider} onValueChange={handleProviderChange}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-[#1e1e1e] border-spotify-gray text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="openai" className="flex items-center">
+            <SelectContent className="bg-spotify-darkgray border-spotify-gray">
+              <SelectItem value="openai" className="focus:bg-[#2a2a2a] focus:text-white">
                 <div className="flex items-center">
                   {getProviderIcon('openai')}
                   <span className="ml-2">OpenAI</span>
                 </div>
               </SelectItem>
-              <SelectItem value="gemini" className="flex items-center">
+              <SelectItem value="gemini" className="focus:bg-[#2a2a2a] focus:text-white">
                 <div className="flex items-center">
                   {getProviderIcon('gemini')}
                   <span className="ml-2">Gemini Pro 2.5</span>
                 </div>
               </SelectItem>
-              <SelectItem value="deepseek" className="flex items-center">
+              <SelectItem value="deepseek" className="focus:bg-[#2a2a2a] focus:text-white">
                 <div className="flex items-center">
                   {getProviderIcon('deepseek')}
                   <span className="ml-2">DeepSeek</span>
@@ -110,28 +104,30 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
         </CardContent>
       </Card>
       
-      <Card className="mb-4">
+      <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Mode</CardTitle>
-          <CardDescription className="text-xs">Select interaction mode</CardDescription>
+          <CardTitle className="text-sm text-white">Mode</CardTitle>
+          <CardDescription className="text-xs text-spotify-lightgray">Select interaction mode</CardDescription>
         </CardHeader>
         <CardContent>
           <Select value={config.mode} onValueChange={handleModeChange}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-[#1e1e1e] border-spotify-gray text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="single">Single Request</SelectItem>
-              <SelectItem value="agent">Agent (Multi-turn)</SelectItem>
+            <SelectContent className="bg-spotify-darkgray border-spotify-gray">
+              <SelectItem value="single" className="focus:bg-[#2a2a2a] focus:text-white">Single Request</SelectItem>
+              <SelectItem value="agent" className="focus:bg-[#2a2a2a] focus:text-white">Agent (Multi-turn)</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
       </Card>
       
-      <Card className="mb-4">
+      <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Temperature</CardTitle>
-          <CardDescription className="text-xs">Adjust response creativity: {config.temperature.toFixed(1)}</CardDescription>
+          <CardTitle className="text-sm text-white">Temperature</CardTitle>
+          <CardDescription className="text-xs text-spotify-lightgray">
+            Adjust response creativity: {config.temperature.toFixed(1)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Slider 
@@ -139,15 +135,22 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
             min={0} 
             max={1} 
             step={0.1} 
-            onValueChange={handleTemperatureChange} 
+            onValueChange={handleTemperatureChange}
+            className="[&>span]:bg-spotify-green"
           />
+          <div className="flex justify-between mt-1">
+            <span className="text-xs text-spotify-lightgray">Precise</span>
+            <span className="text-xs text-spotify-lightgray">Creative</span>
+          </div>
         </CardContent>
       </Card>
       
-      <Card className="mb-4">
+      <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Max Tokens</CardTitle>
-          <CardDescription className="text-xs">Response length: {config.maxTokens}</CardDescription>
+          <CardTitle className="text-sm text-white">Max Tokens</CardTitle>
+          <CardDescription className="text-xs text-spotify-lightgray">
+            Response length: {config.maxTokens}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Slider 
@@ -155,8 +158,13 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
             min={100} 
             max={4000} 
             step={100} 
-            onValueChange={handleMaxTokensChange} 
+            onValueChange={handleMaxTokensChange}
+            className="[&>span]:bg-spotify-green"
           />
+          <div className="flex justify-between mt-1">
+            <span className="text-xs text-spotify-lightgray">Short</span>
+            <span className="text-xs text-spotify-lightgray">Long</span>
+          </div>
         </CardContent>
       </Card>
     </div>

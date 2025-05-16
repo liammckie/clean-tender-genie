@@ -9,7 +9,7 @@ import AIAssistantPanel from '@/components/document/AIAssistantPanel';
 import LLMConfigSidebar from '@/components/document/LLMConfigSidebar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { X, Settings } from 'lucide-react';
+import { X, Settings, MessageSquare, FileCheck } from 'lucide-react';
 
 // Define the LLM provider types
 export type LLMProvider = 'openai' | 'gemini' | 'deepseek';
@@ -56,13 +56,13 @@ With over 15 years of experience in commercial cleaning, we have established a s
     <Layout>
       <div className="flex flex-col h-[calc(100vh-2rem)]">
         <div className="flex justify-between items-center mb-2">
-          <h1 className="text-xl font-semibold">Document Editor: {id || 'New Document'}</h1>
+          <h1 className="text-xl font-semibold text-white">Document Editor: {id || 'New Document'}</h1>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={toggleLLMConfig}
-              className={showLLMConfig ? "bg-secondary" : ""}
+              className={showLLMConfig ? "bg-spotify-darkgray border-spotify-green" : ""}
             >
               <Settings className="h-4 w-4 mr-1" />
               LLM Config
@@ -71,31 +71,33 @@ With over 15 years of experience in commercial cleaning, we have established a s
               variant="outline" 
               size="sm" 
               onClick={toggleReviewSidebar}
-              className={showReviewSidebar ? "bg-secondary" : ""}
+              className={showReviewSidebar ? "bg-spotify-darkgray border-spotify-green" : ""}
             >
+              <FileCheck className="h-4 w-4 mr-1" />
               {showReviewSidebar ? "Hide Reviews" : "Show Reviews"}
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={toggleAIPanel}
-              className={showAIPanel ? "bg-secondary" : ""}
+              className={showAIPanel ? "bg-spotify-darkgray border-spotify-green" : ""}
             >
+              <MessageSquare className="h-4 w-4 mr-1" />
               {showAIPanel ? "Hide AI" : "AI Assist"}
             </Button>
           </div>
         </div>
-        <Separator className="mb-2" />
+        <Separator className="mb-2 bg-spotify-gray" />
         
         <DocumentEditorToolbar />
         
         <div className="flex flex-grow overflow-hidden">
           {showLLMConfig && (
-            <div className="w-64 border-r overflow-auto relative">
+            <div className="w-64 border-r border-spotify-gray overflow-auto relative bg-spotify-black">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 text-spotify-lightgray hover:text-white"
                 onClick={toggleLLMConfig}
               >
                 <X className="h-4 w-4" />
@@ -115,11 +117,11 @@ With over 15 years of experience in commercial cleaning, we have established a s
           </div>
           
           {showReviewSidebar && (
-            <div className="w-80 border-l overflow-auto relative">
+            <div className="w-80 border-l border-spotify-gray overflow-auto relative bg-spotify-black">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 text-spotify-lightgray hover:text-white"
                 onClick={toggleReviewSidebar}
               >
                 <X className="h-4 w-4" />
@@ -130,11 +132,11 @@ With over 15 years of experience in commercial cleaning, we have established a s
         </div>
         
         {showAIPanel && (
-          <div className="border-t h-64 overflow-auto relative">
+          <div className="border-t border-spotify-gray h-64 overflow-auto relative bg-spotify-darkgray">
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2"
+              className="absolute top-2 right-2 text-spotify-lightgray hover:text-white"
               onClick={toggleAIPanel}
             >
               <X className="h-4 w-4" />

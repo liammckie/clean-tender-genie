@@ -47,13 +47,13 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
   };
 
   return (
-    <div className={cn("bg-white rounded-md shadow-sm p-6 min-h-full", className)}>
+    <div className={cn("bg-spotify-darkgray rounded-md shadow-sm p-6 min-h-full", className)}>
       <Textarea
         ref={textareaRef}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[500px] text-base leading-relaxed"
+        className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[500px] text-base leading-relaxed bg-transparent text-white placeholder:text-spotify-lightgray"
         placeholder="Start writing your document..."
       />
     </div>
