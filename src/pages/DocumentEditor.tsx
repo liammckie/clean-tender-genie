@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { X, Settings, MessageSquare, FileCheck } from 'lucide-react';
 
 // Define the LLM provider types
-export type LLMProvider = 'openai' | 'gemini' | 'deepseek';
+export type LLMProvider = 'openai' | 'gemini' | 'deepseek' | 'genkit';
 export type LLMMode = 'single' | 'agent';
 
 // LLM Configuration type
@@ -21,6 +20,7 @@ export interface LLMConfig {
   mode: LLMMode;
   temperature: number;
   maxTokens: number;
+  apiKey?: string; // For providers that need an API key
 }
 
 const DocumentEditor = () => {

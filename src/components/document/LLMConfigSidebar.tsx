@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Select, 
   SelectContent, 
@@ -16,8 +16,10 @@ import {
 } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { CircleDot, Hexagon, Cog } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { CircleDot, Hexagon, Cog, Sparkles } from 'lucide-react';
 import { LLMConfig, LLMProvider, LLMMode } from '@/pages/DocumentEditor';
+import { toast } from 'sonner';
 
 interface LLMConfigSidebarProps {
   config: LLMConfig;
@@ -25,11 +27,16 @@ interface LLMConfigSidebarProps {
 }
 
 const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }) => {
+  const [apiKey, setApiKey] = useState(config.apiKey || '');
+
   const handleProviderChange = (value: string) => {
+    // Reset API key if changing providers
     setConfig({
       ...config,
-      provider: value as LLMProvider
+      provider: value as LLMProvider,
+      apiKey: undefined
     });
+    setApiKey('');
   };
 
   const handleModeChange = (value: string) => {
@@ -53,6 +60,22 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
     });
   };
 
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setApiKey(e.target.value);
+  };
+
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      setConfig({
+        ...config,
+        apiKey
+      });
+      toast.success(`${config.provider.toUpperCase()} API key saved`);
+    } else {
+      toast.error("Please enter a valid API key");
+    }
+  };
+
   const getProviderIcon = (provider: string) => {
     switch (provider) {
       case 'openai':
@@ -61,10 +84,15 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
         return <CircleDot className="h-4 w-4 text-blue-500" />;
       case 'deepseek':
         return <Hexagon className="h-4 w-4 text-purple-500" />;
+      case 'genkit':
+        return <Sparkles className="h-4 w-4 text-yellow-500" />;
       default:
         return <Cog className="h-4 w-4" />;
     }
   };
+
+  // Check if the current provider needs an API key
+  const needsApiKey = config.provider === 'genkit';
 
   return (
     <div className="h-full p-4 text-white">
@@ -99,10 +127,41 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
                   <span className="ml-2">DeepSeek</span>
                 </div>
               </SelectItem>
+              <SelectItem value="genkit" className="focus:bg-[#2a2a2a] focus:text-white">
+                <div className="flex items-center">
+                  {getProviderIcon('genkit')}
+                  <span className="ml-2">GenKit AI</span>
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
       </Card>
+      
+      {needsApiKey && (
+        <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-white">GenKit API Key</CardTitle>
+            <CardDescription className="text-xs text-spotify-lightgray">Required for GenKit integration</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Input
+              type="password"
+              placeholder="Enter GenKit API key"
+              value={apiKey}
+              onChange={handleApiKeyChange}
+              className="bg-[#1e1e1e] border-spotify-gray text-white"
+            />
+            <Button 
+              onClick={saveApiKey} 
+              size="sm" 
+              className="w-full bg-spotify-green hover:bg-spotify-green/90 text-black"
+            >
+              Save API Key
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       
       <Card className="mb-4 bg-spotify-darkgray border-spotify-gray">
         <CardHeader className="pb-2">
