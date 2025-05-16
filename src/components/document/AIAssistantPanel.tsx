@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { LLMConfig } from '@/pages/DocumentEditor';
-import { CircleDot, Hexagon, Sparkles } from 'lucide-react';
-import { initGenKitClient, generateWithGenKit } from '@/lib/genkit-ai';
+import { CircleDot, Hexagon } from 'lucide-react';
 
 interface AIAssistantPanelProps {
   documentContent: string;
@@ -23,21 +22,6 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<{role: string, content: string}[]>([]);
-  const [genKitClient, setGenKitClient] = useState<any>(null);
-  
-  // Initialize GenKit client when API key is available
-  useEffect(() => {
-    if (llmConfig.provider === 'genkit' && llmConfig.apiKey) {
-      try {
-        const client = initGenKitClient(llmConfig.apiKey);
-        setGenKitClient(client);
-        toast.success('GenKit client initialized successfully');
-      } catch (error) {
-        console.error('Failed to initialize GenKit client:', error);
-        toast.error('Failed to initialize GenKit client');
-      }
-    }
-  }, [llmConfig.provider, llmConfig.apiKey]);
   
   // Common prompts for document editing
   const commonPrompts = [
@@ -56,43 +40,14 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
 
     setIsLoading(true);
 
+    // In a real application, you would call your LLM API here based on the selected provider
     try {
       // Add user message to conversation if in agent mode
       if (llmConfig.mode === 'agent') {
         setConversation([...conversation, {role: 'user', content: prompt}]);
       }
       
-      // Handle GenKit provider differently
-      if (llmConfig.provider === 'genkit') {
-        if (!genKitClient) {
-          toast.error('GenKit client not initialized. Please check your API key.');
-          setIsLoading(false);
-          return;
-        }
-        
-        try {
-          const genkitResponse = await generateWithGenKit(genKitClient, prompt, {
-            temperature: llmConfig.temperature,
-            maxTokens: llmConfig.maxTokens
-          });
-          
-          if (llmConfig.mode === 'agent') {
-            setConversation([...conversation, {role: 'user', content: prompt}, {role: 'assistant', content: genkitResponse}]);
-          }
-          
-          setSuggestions([...suggestions, genkitResponse]);
-          toast.success(`Content generated using GenKit AI`);
-        } catch (error) {
-          console.error('Error with GenKit generation:', error);
-          toast.error('Failed to generate content with GenKit');
-        }
-        
-        setIsLoading(false);
-        setPrompt('');
-        return;
-      }
-      
-      // Simulate API call delay for other providers
+      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Generate response based on selected provider and configuration
@@ -157,15 +112,10 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
         return <CircleDot className="h-4 w-4 text-blue-500" />;
       case 'deepseek':
         return <Hexagon className="h-4 w-4 text-purple-500" />;
-      case 'genkit':
-        return <Sparkles className="h-4 w-4 text-yellow-500" />;
       default:
         return null;
     }
   };
-
-  // Check if GenKit is selected but no API key provided
-  const showApiKeyWarning = llmConfig.provider === 'genkit' && !llmConfig.apiKey;
 
   return (
     <div className="p-4 h-full flex flex-col">
@@ -179,12 +129,6 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
           </span>
         </div>
       </div>
-      
-      {showApiKeyWarning && (
-        <div className="mb-4 p-2 border border-yellow-500 bg-yellow-500/20 rounded text-sm">
-          Please provide a GenKit API key in the LLM Configuration panel to use GenKit AI.
-        </div>
-      )}
       
       <div className="flex flex-wrap gap-2 mb-4">
         {commonPrompts.map((promptText, index) => (
@@ -208,7 +152,7 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
         />
         <Button 
           onClick={generateContent}
-          disabled={isLoading || (llmConfig.provider === 'genkit' && !llmConfig.apiKey)}
+          disabled={isLoading}
           className="whitespace-nowrap"
         >
           {isLoading ? "Generating..." : "Generate"}
