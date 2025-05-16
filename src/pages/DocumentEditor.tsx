@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { X, Settings, MessageSquare, FileCheck } from 'lucide-react';
 
 // Define the LLM provider types
-export type LLMProvider = 'openai' | 'gemini' | 'deepseek';
+export type LLMProvider = 'openai' | 'gemini' | 'deepseek' | 'genkit';
 export type LLMMode = 'single' | 'agent';
 
 // LLM Configuration type

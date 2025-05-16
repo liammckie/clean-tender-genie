@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Select, 
@@ -16,7 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { CircleDot, Hexagon, Cog } from 'lucide-react';
+import { CircleDot, Hexagon, Cog, Cpu } from 'lucide-react';
 import { LLMConfig, LLMProvider, LLMMode } from '@/pages/DocumentEditor';
 
 interface LLMConfigSidebarProps {
@@ -61,6 +60,8 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
         return <CircleDot className="h-4 w-4 text-blue-500" />;
       case 'deepseek':
         return <Hexagon className="h-4 w-4 text-purple-500" />;
+      case 'genkit':
+        return <Cpu className="h-4 w-4 text-yellow-500" />;
       default:
         return <Cog className="h-4 w-4" />;
     }
@@ -97,6 +98,12 @@ const LLMConfigSidebar: React.FC<LLMConfigSidebarProps> = ({ config, setConfig }
                 <div className="flex items-center">
                   {getProviderIcon('deepseek')}
                   <span className="ml-2">DeepSeek</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="genkit" className="focus:bg-[#2a2a2a] focus:text-white">
+                <div className="flex items-center">
+                  {getProviderIcon('genkit')}
+                  <span className="ml-2">GenKit AI</span>
                 </div>
               </SelectItem>
             </SelectContent>
