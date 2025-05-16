@@ -17,6 +17,7 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { CircleDot, Hexagon, Cog, Sparkles } from 'lucide-react';
 import { LLMConfig, LLMProvider, LLMMode } from '@/pages/DocumentEditor';
 import { toast } from 'sonner';
