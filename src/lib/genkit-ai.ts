@@ -1,11 +1,12 @@
 
-import { createChat } from '@genkit-ai/ai';
+// Import directly from the package without trying to use createChat
+import { AI } from '@genkit-ai/ai';
 
 // Initialize the Genkit client
 export const initGenkit = (apiKey: string) => {
   // Return client or utilities
   return {
-    chat: createChat({
+    chat: new AI({
       apiKey: apiKey
     })
   };
