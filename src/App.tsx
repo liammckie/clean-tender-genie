@@ -17,6 +17,7 @@ import Reports from './pages/Reports';
 import GoogleDriveTest from './pages/GoogleDriveTest';
 import DocumentEditor from './pages/DocumentEditor';
 import DmsDocumentDetails from './pages/DmsDocumentDetails';
+import GoogleDriveDocView from './pages/GoogleDriveDocView';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/google-drive-test" element={<GoogleDriveTest />} />
+            <Route path="/google-drive/documents/:id" element={<GoogleDriveDocView />} />
             <Route path="/document-editor" element={<DocumentEditor />} />
             <Route path="/document-editor/:id" element={<DocumentEditor />} />
             <Route path="*" element={<NotFound />} />
