@@ -1,5 +1,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import { createClient } from '@supabase/supabase-js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,7 +9,7 @@ export default async function handler(
 ) {
   // Validate environment variables
   const requiredEnvVars = [
-    'OPENAI_API_KEY',
+    'GOOGLE_API_KEY',
     'SUPABASE_URL',
     'SUPABASE_SERVICE_ROLE_KEY',
   ];
@@ -46,17 +48,88 @@ export default async function handler(
       console.log('Output Folder ID:', outputFolderId);
     }
 
-    // TODO: Implement generation logic using OpenAI API
-    // TODO: Retrieve stored RFT from Supabase or Google Drive based on provided IDs
-    // TODO: Process the RFT using OpenAI Assistants API
-    // TODO: Output result to Google Drive if outputFolderId is provided
-    // TODO: Update task status in database
+    // Create a Supabase client using the service role key
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    let rftContent = '';
+    let source: 'local' | 'google-drive' = 'local';
+
+    if (storeId) {
+      const { data, error } = await supabase
+        .storage
+        .from('rft-files')
+        .download(storeId);
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to download RFT document');
+      }
+
+      const buf = await data.arrayBuffer();
+      rftContent = Buffer.from(buf).toString('utf-8');
+    } else if (driveFileId) {
+      source = 'google-drive';
+      const driveRes = await supabase.functions.invoke('google-drive', {
+        body: { action: 'downloadFile', fileId: driveFileId },
+      });
+
+      if (driveRes.error) {
+        throw new Error(driveRes.error.message || 'Failed to download Drive file');
+      }
+
+      const driveData = driveRes.data?.data;
+      if (!driveData?.content) {
+        throw new Error('Drive file did not return content');
+      }
+      rftContent = Buffer.from(driveData.content, 'base64').toString('utf-8');
+    }
+
+    // Generate a response using Google's Gemini model
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const model = genAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
+    });
+
+    const geminiRes = await model.generateContent(rftContent);
+    const generated = geminiRes.response.text();
+
+    // Save generated result back to Supabase Storage
+    const outputPath = `generated/response-${Date.now()}.md`;
+    const { error: uploadErr } = await supabase
+      .storage
+      .from('rft-files')
+      .upload(outputPath, generated, {
+        contentType: 'text/markdown',
+        upsert: true,
+      });
+
+    if (uploadErr) {
+      throw new Error(uploadErr.message);
+    }
+
+    // Insert new task record with completed status
+    const { data: taskData, error: dbErr } = await supabase
+      .from('rft_tasks')
+      .insert({
+        rft_file_id: storeId ?? driveFileId,
+        output_file_id: outputPath,
+        status: 'completed',
+        source,
+      })
+      .select()
+      .single();
+
+    if (dbErr) {
+      throw new Error(dbErr.message);
+    }
 
     return res.status(200).json({
-      taskId: `task-${Date.now()}`,
-      status: 'processing',
-      source: storeId ? 'local' : 'google-drive',
-      outputDestination: outputFolderId ? 'google-drive' : 'default',
+      taskId: taskData.id,
+      status: taskData.status,
+      outputFileId: taskData.output_file_id,
+      source,
     });
   } catch (error: any) {
     console.error('Error generating response:', error);
