@@ -26,6 +26,12 @@ const EXPORT_FORMATS = {
   'application/vnd.google-apps.form': 'application/pdf',
 };
 
+// Export format for text content (for better display)
+const TEXT_EXPORT_FORMATS = {
+  'application/vnd.google-apps.document': 'text/plain',
+  'application/vnd.google-apps.spreadsheet': 'text/csv',
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -154,23 +160,48 @@ serve(async (req) => {
           if (GOOGLE_WORKSPACE_MIME_TYPES.includes(mimeType)) {
             console.log(`Detected Google Workspace file type: ${mimeType}, using export API`);
             
-            const exportMimeType = EXPORT_FORMATS[mimeType] || 'application/pdf';
-            console.log(`Exporting as ${exportMimeType}`);
+            // Try to export as text first for better display if it's a document or spreadsheet
+            let exportMimeType = EXPORT_FORMATS[mimeType] || 'application/pdf';
+            const textMimeType = TEXT_EXPORT_FORMATS[mimeType];
             
-            // Export the file
-            const exportResponse = await drive.files.export({
-              fileId: fileId,
-              mimeType: exportMimeType
-            }, { responseType: 'arraybuffer' });
-            
-            console.log('File export response:', {
-              status: exportResponse.status,
-              contentSize: exportResponse.data.byteLength
-            });
-            
-            // Convert the exported content to base64
-            content = btoa(String.fromCharCode(...new Uint8Array(exportResponse.data)));
-            downloadedMimeType = exportMimeType;
+            try {
+              // First attempt to export as text if available for this type
+              if (textMimeType) {
+                console.log(`Attempting to export as ${textMimeType} for better display`);
+                const textExportResponse = await drive.files.export({
+                  fileId: fileId,
+                  mimeType: textMimeType
+                }, { responseType: 'arraybuffer' });
+                
+                console.log('Text export response:', {
+                  status: textExportResponse.status,
+                  contentSize: textExportResponse.data.byteLength
+                });
+                
+                // Convert the exported text content to base64
+                content = btoa(String.fromCharCode(...new Uint8Array(textExportResponse.data)));
+                downloadedMimeType = textMimeType;
+              } else {
+                throw new Error('Text export not available for this file type');
+              }
+            } catch (textExportError) {
+              console.log('Text export failed, falling back to default format:', textExportError.message);
+              
+              // Fallback to PDF or other format
+              const exportResponse = await drive.files.export({
+                fileId: fileId,
+                mimeType: exportMimeType
+              }, { responseType: 'arraybuffer' });
+              
+              console.log('File export response:', {
+                status: exportResponse.status,
+                contentSize: exportResponse.data.byteLength
+              });
+              
+              // Convert the exported content to base64
+              content = btoa(String.fromCharCode(...new Uint8Array(exportResponse.data)));
+              downloadedMimeType = exportMimeType;
+            }
           } else {
             // Regular file download
             const response = await drive.files.get({

@@ -1,12 +1,12 @@
 
-// Import the AI class correctly from the package
-import { AI } from '@genkit-ai/ai';
+// Import the correct class and types from the genkit package
+import { GenKit } from '@genkit-ai/ai';
 
 // Initialize the Genkit client
 export const initGenkit = (apiKey: string) => {
   // Return client or utilities
   return {
-    chat: new AI({
+    chat: new GenKit({
       apiKey: apiKey
     })
   };

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { googleDriveService } from '@/services/googleDriveService';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const GoogleDriveDocView = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,7 +71,28 @@ const GoogleDriveDocView = () => {
   }, [id, toast]);
 
   const renderContent = () => {
-    if (!fileData?.content) return null;
+    if (!fileData?.content) {
+      return (
+        <div className="p-8 text-center">
+          <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p>Content preview not available. Use the "Open in Google Drive" button to view this file.</p>
+        </div>
+      );
+    }
+    
+    // Handle Google Doc exported as text/plain
+    if (fileData.mimeType === 'text/plain') {
+      try {
+        const decodedContent = atob(fileData.content);
+        return (
+          <div className="p-4 bg-spotify-darkgray rounded border border-spotify-gray overflow-auto max-h-[500px]">
+            <pre className="whitespace-pre-wrap text-sm">{decodedContent}</pre>
+          </div>
+        );
+      } catch (e) {
+        return renderFallbackContent();
+      }
+    }
     
     // Handle different file types
     if (fileData.mimeType.includes('application/pdf')) {
@@ -86,25 +108,31 @@ const GoogleDriveDocView = () => {
           </div>
         );
       } catch (e) {
-        return (
-          <div className="p-8 text-center">
-            <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p>PDF preview not available directly. Use the "Open in Google Drive" button to view this file.</p>
-          </div>
-        );
+        return renderFallbackContent();
       }
     }
     
     // For Excel/Spreadsheet files
     if (fileData.mimeType.includes('spreadsheet') || 
         fileData.mimeType.includes('excel') || 
-        fileData.mimeType.includes('sheet')) {
-      return (
-        <div className="p-8 text-center">
-          <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>Spreadsheet preview not available. Use the "Download" or "Open in Google Drive" buttons to view this file.</p>
-        </div>
-      );
+        fileData.mimeType.includes('sheet') ||
+        fileData.mimeType.includes('csv')) {
+      
+      // If it's CSV, we can display it
+      if (fileData.mimeType.includes('csv') || fileData.mimeType === 'text/csv') {
+        try {
+          const decodedContent = atob(fileData.content);
+          return (
+            <div className="p-4 bg-spotify-darkgray rounded border border-spotify-gray overflow-auto max-h-[500px]">
+              <pre className="whitespace-pre-wrap text-sm font-mono">{decodedContent}</pre>
+            </div>
+          );
+        } catch (e) {
+          return renderFallbackContent();
+        }
+      }
+      
+      return renderFallbackContent("Spreadsheet");
     }
     
     // For text content, decode and display
@@ -116,22 +144,38 @@ const GoogleDriveDocView = () => {
         </div>
       );
     } catch (e) {
-      return (
-        <div className="p-4 text-center">
-          <p>Content cannot be displayed in this view.</p>
-        </div>
-      );
+      return renderFallbackContent();
     }
   };
+
+  const renderFallbackContent = (fileType = "File") => (
+    <div className="p-8 text-center">
+      <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+      <p>{fileType} preview not available directly. Use the "Open in Google Drive" button to view this file.</p>
+    </div>
+  );
 
   const getFileTypeInfo = () => {
     if (!fileData) return "";
     
     if (fileData.originalMimeType && fileData.originalMimeType !== fileData.mimeType) {
-      return `${fileData.originalMimeType} (exported as ${fileData.mimeType})`;
+      return `${getReadableFileType(fileData.originalMimeType)} (exported as ${getReadableFileType(fileData.mimeType)})`;
     }
     
-    return fileData.mimeType;
+    return getReadableFileType(fileData.mimeType);
+  };
+
+  const getReadableFileType = (mimeType: string) => {
+    if (mimeType === 'application/vnd.google-apps.document') return 'Google Doc';
+    if (mimeType === 'application/vnd.google-apps.spreadsheet') return 'Google Sheet';
+    if (mimeType === 'application/vnd.google-apps.presentation') return 'Google Slides';
+    if (mimeType === 'application/vnd.google-apps.folder') return 'Google Drive Folder';
+    if (mimeType === 'application/pdf') return 'PDF';
+    if (mimeType === 'text/plain') return 'Text';
+    if (mimeType === 'text/csv') return 'CSV';
+    
+    // For generic types, just show the second part
+    return mimeType.split('/').pop()?.toUpperCase() || mimeType;
   };
 
   return (
@@ -165,8 +209,13 @@ const GoogleDriveDocView = () => {
           <Card>
             <CardHeader>
               <CardTitle>{fileData.name}</CardTitle>
-              <CardDescription>
+              <CardDescription className="flex items-center gap-2">
                 {getFileTypeInfo()}
+                {fileData.originalMimeType && (
+                  <Badge variant="outline" className="ml-2">
+                    {getReadableFileType(fileData.originalMimeType)}
+                  </Badge>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
