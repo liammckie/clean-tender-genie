@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppStore } from '@/hooks/useAppStore';
@@ -124,7 +123,7 @@ const RftTasksDashboard = () => {
       case 'processing':
         return <Badge variant="secondary" className="flex items-center gap-1"><Loader className="h-3 w-3 animate-spin" /> Processing</Badge>;
       case 'completed':
-        return <Badge variant="success" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-200"><CheckCircle className="h-3 w-3" /> Completed</Badge>;
+        return <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-200"><CheckCircle className="h-3 w-3" /> Completed</Badge>;
       case 'failed':
         return <Badge variant="destructive" className="flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Failed</Badge>;
       default:
