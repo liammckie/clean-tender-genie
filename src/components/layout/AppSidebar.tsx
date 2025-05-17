@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, FileText, FolderOpen, BarChart3, Settings, PlusSquare, Search } from 'lucide-react';
+import { Home, FileText, FolderOpen, BarChart3, Settings, PlusSquare, Search, CloudSync } from 'lucide-react';
 import ThemeSwitcher from '../common/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ const AppSidebar = () => {
     { name: 'RFT Tasks', path: '/rfts', icon: <FileText size={20} /> },
     { name: 'Document Editor', path: '/document-editor', icon: <PlusSquare size={20} /> },
     { name: 'DMS', path: '/dms', icon: <FolderOpen size={20} /> },
+    { name: 'Google Drive', path: '/google-drive', icon: <CloudSync size={20} /> },
     { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} /> },
     { name: 'Admin', path: '/admin', icon: <Settings size={20} /> },
   ];

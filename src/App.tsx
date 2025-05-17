@@ -10,10 +10,11 @@ import DmsRouter from './pages/DmsRouter';
 import GoogleDriveDocView from './pages/GoogleDriveDocView';
 import Home from './pages/Home';
 import RftTasksDashboard from './pages/RftTasksDashboard';
-import Login from './pages/Login';
 import { useAuth } from './contexts/AuthContext';
-import Signup from './pages/Signup';
 import RftTaskDetail from './pages/RftTaskDetail';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import GoogleDriveTestPage from './pages/GoogleDriveTestPage';
 
 const App: React.FC = () => {
   const { isLoggedIn } = useAuth();
@@ -21,15 +22,15 @@ const App: React.FC = () => {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: isLoggedIn ? <Home /> : <Login />,
+      element: isLoggedIn ? <Home /> : <LoginPage />,
     },
     {
       path: "/login",
-      element: <Login />,
+      element: <LoginPage />,
     },
     {
       path: "/signup",
-      element: <Signup />,
+      element: <SignupPage />,
     },
     {
       path: "/dms",
@@ -46,15 +47,19 @@ const App: React.FC = () => {
       ],
     },
     {
-      path: "google-drive/documents/:id",
+      path: "/google-drive/documents/:id",
       element: <GoogleDriveDocView />
+    },
+    {
+      path: "/google-drive",
+      element: <GoogleDriveTestPage />
     },
     {
       path: "/rfts",
       element: <RftTasksDashboard />
     },
     {
-      path: "rfts/:id",
+      path: "/rfts/:id",
       element: <RftTaskDetail />
     },
   ]);
