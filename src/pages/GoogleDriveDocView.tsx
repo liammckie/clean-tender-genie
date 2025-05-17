@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, ExternalLink, FileText, Loader } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, FileText, Loader, Wand2 } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { googleDriveService } from '@/services/googleDriveService';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { vertexAiService, TenderAnalysis } from '@/services/vertexAiService';
 
 const GoogleDriveDocView = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,8 @@ const GoogleDriveDocView = () => {
     webViewLink?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<TenderAnalysis | null>(null);
 
   useEffect(() => {
     async function fetchDocument() {
@@ -227,7 +230,7 @@ const GoogleDriveDocView = () => {
               </div>
               <div className="flex gap-2">
                 {fileData.webViewLink && (
-                  <Button 
+                  <Button
                     variant="outline"
                     className="flex items-center gap-2"
                     asChild
@@ -243,7 +246,7 @@ const GoogleDriveDocView = () => {
                   </Button>
                 )}
                 {fileData.content && (
-                  <Button 
+                  <Button
                     className="flex items-center gap-2"
                     onClick={() => {
                       try {
@@ -276,9 +279,95 @@ const GoogleDriveDocView = () => {
                     Download
                   </Button>
                 )}
+                {fileData.content && (
+                  <Button
+                    variant="secondary"
+                    className="flex items-center gap-2"
+                    onClick={async () => {
+                      if (!fileData.content) return;
+                      try {
+                        setAnalyzing(true);
+                        setAnalysis(null);
+                        const text = atob(fileData.content);
+                        const result = await vertexAiService.analyzeTender(text);
+                        setAnalysis(result);
+                        toast({
+                          title: 'Analysis complete',
+                          description: 'Tender review generated'
+                        });
+                      } catch (err: any) {
+                        console.error('Analysis error:', err);
+                        toast({
+                          title: 'Analysis failed',
+                          description: err.message || 'Unable to analyse document',
+                          variant: 'destructive'
+                        });
+                      } finally {
+                        setAnalyzing(false);
+                      }
+                    }}
+                    disabled={analyzing}
+                  >
+                    <Wand2 className="h-4 w-4" />
+                    {analyzing ? 'Analysing...' : 'Analyse'}
+                  </Button>
+                )}
               </div>
             </CardFooter>
           </Card>
+          {analysis && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Tender Analysis</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-medium">Summary</h3>
+                  <p className="text-sm mt-1">{analysis.summary}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium">Legal Requirements</h3>
+                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                    {analysis.legalRequirements.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-medium">Operational Needs</h3>
+                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                    {analysis.operationalNeeds.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-medium">Estimation Considerations</h3>
+                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                    {analysis.estimationConsiderations.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-medium">Key Criteria</h3>
+                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                    {analysis.keyCriteria.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-medium">Win Themes</h3>
+                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                    {analysis.winThemes.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         ) : (
           <Card>
             <CardContent className="py-10 text-center">
