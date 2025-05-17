@@ -1,5 +1,5 @@
 
-// Import directly from the package without trying to use createChat
+// Import the AI class correctly from the package
 import { AI } from '@genkit-ai/ai';
 
 // Initialize the Genkit client

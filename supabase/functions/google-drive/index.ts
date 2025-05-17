@@ -8,6 +8,24 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Google Workspace MIME types that need to be exported rather than downloaded directly
+const GOOGLE_WORKSPACE_MIME_TYPES = [
+  'application/vnd.google-apps.document', // Google Docs
+  'application/vnd.google-apps.spreadsheet', // Google Sheets
+  'application/vnd.google-apps.presentation', // Google Slides
+  'application/vnd.google-apps.drawing', // Google Drawings
+  'application/vnd.google-apps.form', // Google Forms
+];
+
+// Export format mapping for Google Workspace files
+const EXPORT_FORMATS = {
+  'application/vnd.google-apps.document': 'application/pdf',
+  'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.google-apps.presentation': 'application/pdf',
+  'application/vnd.google-apps.drawing': 'image/png',
+  'application/vnd.google-apps.form': 'application/pdf',
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -122,31 +140,58 @@ serve(async (req) => {
         console.log(`Downloading file: ${fileId}`);
         
         try {
-          // Get file metadata to check its type
+          // Get file metadata first to determine the mime type
           const fileMetadata = await drive.files.get({
             fileId: fileId,
             fields: 'id, name, mimeType'
           });
           
-          // Download the file content
-          const response = await drive.files.get({
-            fileId: fileId,
-            alt: 'media'
-          }, { responseType: 'arraybuffer' });
+          const mimeType = fileMetadata.data.mimeType;
+          let content = '';
+          let downloadedMimeType = mimeType;
           
-          console.log('File download response:', {
-            status: response.status,
-            fileName: fileMetadata.data.name,
-            contentSize: response.data.byteLength
-          });
-          
-          // Convert the file content to base64
-          const content = btoa(String.fromCharCode(...new Uint8Array(response.data)));
+          // Check if this is a Google Workspace file that needs to be exported
+          if (GOOGLE_WORKSPACE_MIME_TYPES.includes(mimeType)) {
+            console.log(`Detected Google Workspace file type: ${mimeType}, using export API`);
+            
+            const exportMimeType = EXPORT_FORMATS[mimeType] || 'application/pdf';
+            console.log(`Exporting as ${exportMimeType}`);
+            
+            // Export the file
+            const exportResponse = await drive.files.export({
+              fileId: fileId,
+              mimeType: exportMimeType
+            }, { responseType: 'arraybuffer' });
+            
+            console.log('File export response:', {
+              status: exportResponse.status,
+              contentSize: exportResponse.data.byteLength
+            });
+            
+            // Convert the exported content to base64
+            content = btoa(String.fromCharCode(...new Uint8Array(exportResponse.data)));
+            downloadedMimeType = exportMimeType;
+          } else {
+            // Regular file download
+            const response = await drive.files.get({
+              fileId: fileId,
+              alt: 'media'
+            }, { responseType: 'arraybuffer' });
+            
+            console.log('File download response:', {
+              status: response.status,
+              contentSize: response.data.byteLength
+            });
+            
+            // Convert the file content to base64
+            content = btoa(String.fromCharCode(...new Uint8Array(response.data)));
+          }
           
           result = {
             id: fileId,
             name: fileMetadata.data.name,
-            mimeType: fileMetadata.data.mimeType,
+            mimeType: downloadedMimeType,
+            originalMimeType: mimeType,
             content: content
           };
         } catch (downloadError) {

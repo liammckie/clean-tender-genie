@@ -18,6 +18,7 @@ const GoogleDriveDocView = () => {
     id: string;
     name: string;
     mimeType: string;
+    originalMimeType?: string;
     content?: string;
     webViewLink?: string;
   } | null>(null);
@@ -37,27 +38,19 @@ const GoogleDriveDocView = () => {
         
         // Then download the content if it's a supported type
         if (metadata) {
-          const isSupportedType = metadata.mimeType.includes('text') || 
-                                  metadata.mimeType.includes('document') ||
-                                  metadata.mimeType.includes('application/pdf');
-          
-          if (isSupportedType) {
-            try {
-              const fileWithContent = await googleDriveService.downloadFile(id);
-              setFileData(fileWithContent);
-            } catch (contentError) {
-              console.error('Error downloading file content:', contentError);
-              // Still set the metadata even if content download fails
-              setFileData(metadata);
-              toast({
-                title: 'Content preview unavailable',
-                description: 'Only metadata could be retrieved for this file',
-                variant: 'destructive',
-              });
-            }
-          } else {
-            // Just use metadata for non-supported files
+          // For all files, try to download/export
+          try {
+            const fileWithContent = await googleDriveService.downloadFile(id);
+            setFileData(fileWithContent);
+          } catch (contentError) {
+            console.error('Error downloading file content:', contentError);
+            // Still set the metadata even if content download fails
             setFileData(metadata);
+            toast({
+              title: 'Content preview unavailable',
+              description: 'Only metadata could be retrieved for this file',
+              variant: 'destructive',
+            });
           }
         }
       } catch (err: any) {
@@ -81,11 +74,35 @@ const GoogleDriveDocView = () => {
     
     // Handle different file types
     if (fileData.mimeType.includes('application/pdf')) {
-      // For PDF, we can only show a link to view it
+      try {
+        const pdfData = `data:${fileData.mimeType};base64,${fileData.content}`;
+        return (
+          <div className="p-4 bg-spotify-darkgray rounded border border-spotify-gray overflow-auto h-[500px]">
+            <iframe 
+              src={pdfData} 
+              className="w-full h-full" 
+              title={fileData.name}
+            />
+          </div>
+        );
+      } catch (e) {
+        return (
+          <div className="p-8 text-center">
+            <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <p>PDF preview not available directly. Use the "Open in Google Drive" button to view this file.</p>
+          </div>
+        );
+      }
+    }
+    
+    // For Excel/Spreadsheet files
+    if (fileData.mimeType.includes('spreadsheet') || 
+        fileData.mimeType.includes('excel') || 
+        fileData.mimeType.includes('sheet')) {
       return (
         <div className="p-8 text-center">
           <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>PDF preview not available directly. Use the "Open in Google Drive" button to view this file.</p>
+          <p>Spreadsheet preview not available. Use the "Download" or "Open in Google Drive" buttons to view this file.</p>
         </div>
       );
     }
@@ -105,6 +122,16 @@ const GoogleDriveDocView = () => {
         </div>
       );
     }
+  };
+
+  const getFileTypeInfo = () => {
+    if (!fileData) return "";
+    
+    if (fileData.originalMimeType && fileData.originalMimeType !== fileData.mimeType) {
+      return `${fileData.originalMimeType} (exported as ${fileData.mimeType})`;
+    }
+    
+    return fileData.mimeType;
   };
 
   return (
@@ -139,7 +166,7 @@ const GoogleDriveDocView = () => {
             <CardHeader>
               <CardTitle>{fileData.name}</CardTitle>
               <CardDescription>
-                {fileData.mimeType}
+                {getFileTypeInfo()}
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -5,6 +5,7 @@ type GoogleDriveFile = {
   id: string;
   name: string;
   mimeType: string;
+  originalMimeType?: string;
   createdTime?: string;
   modifiedTime?: string;
   size?: string;
@@ -97,6 +98,7 @@ export const googleDriveService = {
     id: string;
     name: string;
     mimeType: string;
+    originalMimeType?: string;
     content: string;
   }> {
     console.log('Downloading file:', fileId);
