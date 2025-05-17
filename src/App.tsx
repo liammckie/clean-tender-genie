@@ -16,6 +16,7 @@ import AdminRouter from './pages/AdminRouter';
 import Reports from './pages/Reports';
 import GoogleDriveTest from './pages/GoogleDriveTest';
 import DocumentEditor from './pages/DocumentEditor';
+import DmsDocumentDetails from './pages/DmsDocumentDetails';
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/rfts" element={<RftTasksDashboard />} />
             <Route path="/rfts/:id" element={<IndividualRftTaskView />} />
-            <Route path="/dms/*" element={<DmsRouter />} />
+            <Route path="/dms" element={<DmsRouter />} />
+            <Route path="/dms/documents/:id" element={<DmsDocumentDetails />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/reports" element={<Reports />} />

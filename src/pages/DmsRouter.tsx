@@ -1,10 +1,19 @@
+
 import React from 'react';
 import Layout from '../components/layout/Layout';
 import { Outlet } from 'react-router-dom';
-const DmsRouter = () => (
-  <Layout>
-    <h2 className="text-2xl font-bold mb-4">DMS Section</h2>
-    <Outlet />
-  </Layout>
-);
+import DmsHome from './DmsHome';
+import { useLocation } from 'react-router-dom';
+
+const DmsRouter = () => {
+  const location = useLocation();
+  const isDmsRoot = location.pathname === '/dms' || location.pathname === '/dms/';
+
+  return (
+    <Layout>
+      {isDmsRoot ? <DmsHome /> : <Outlet />}
+    </Layout>
+  );
+};
+
 export default DmsRouter;

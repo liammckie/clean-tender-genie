@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Select, 
@@ -18,6 +17,7 @@ import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { CircleDot, Hexagon, Cog } from 'lucide-react';
 import { LLMConfig, LLMProvider, LLMMode } from '@/pages/DocumentEditor';
+import { Button } from '@/components/ui/button';
 
 interface LLMConfigSidebarProps {
   config: LLMConfig;
