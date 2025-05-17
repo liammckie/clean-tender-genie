@@ -10,8 +10,11 @@ const ThemeSwitcher: React.FC = () => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    // Default to dark for Spotify theme unless explicitly set to light
-    const initialDarkMode = savedTheme === 'light' ? false : true;
+    // Determine initial dark mode using the saved theme, or fall back to the
+    // user's system preference when no preference is stored
+    const initialDarkMode = savedTheme
+      ? savedTheme !== 'light'
+      : prefersDark;
     
     setIsDarkMode(initialDarkMode);
     
