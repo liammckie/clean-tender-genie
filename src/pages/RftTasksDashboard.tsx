@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAppStore } from '@/hooks/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '../components/layout/Layout';
 import { FileUploader } from '../components/FileUploader';
 import { Button } from '@/components/ui/button';
 import { fetchJson } from '@/utils/api';
-import { Loader, FileText, Upload, Download, File } from 'lucide-react';
+import { Loader, FileText, Upload, Download, File, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -19,6 +20,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleDriveFile } from '@/services/googleDriveService';
 import GoogleDrivePicker from '@/components/GoogleDrivePicker';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { RftTask, rftTaskService } from '@/services/rftTaskService';
+import { formatDistanceToNow } from 'date-fns';
 
 interface GenerateResponse {
   taskId: string;
@@ -32,6 +36,28 @@ const RftTasksDashboard = () => {
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(null);
   const [selectedOutputFolder, setSelectedOutputFolder] = useState<GoogleDriveFile | null>(null);
   const [uploadMethod, setUploadMethod] = useState<'local' | 'gdrive'>('local');
+  const [tasks, setTasks] = useState<RftTask[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = async () => {
+    setTasksLoading(true);
+    try {
+      const taskList = await rftTaskService.listTasks();
+      setTasks(taskList);
+    } catch (err: any) {
+      toast({
+        title: 'Failed to load tasks',
+        description: err.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    } finally {
+      setTasksLoading(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!storeId && !selectedFile) {
@@ -61,6 +87,9 @@ const RftTasksDashboard = () => {
         title: 'Generation Started',
         description: `Task ID: ${result.taskId} is now ${result.status}`,
       });
+      
+      // Refresh the task list after generating a new task
+      loadTasks();
     } catch (err: any) {
       toast({
         title: 'Generation Failed',
@@ -86,6 +115,21 @@ const RftTasksDashboard = () => {
       title: 'Output Folder Selected',
       description: `${folder.name} selected for output documents`,
     });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</Badge>;
+      case 'processing':
+        return <Badge variant="secondary" className="flex items-center gap-1"><Loader className="h-3 w-3 animate-spin" /> Processing</Badge>;
+      case 'completed':
+        return <Badge variant="success" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-200"><CheckCircle className="h-3 w-3" /> Completed</Badge>;
+      case 'failed':
+        return <Badge variant="destructive" className="flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Failed</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const documentSelected = status === 'uploaded' || selectedFile !== null;
@@ -196,7 +240,46 @@ const RftTasksDashboard = () => {
 
         <div className="bg-card rounded-lg p-6 shadow-sm border">
           <h3 className="text-xl font-semibold mb-4">Recent Tasks</h3>
-          <p className="text-muted-foreground">No recent tasks found.</p>
+          
+          {tasksLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">Loading tasks...</span>
+            </div>
+          ) : tasks.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No recent tasks found.</p>
+          ) : (
+            <div className="space-y-4">
+              {tasks.map((task) => (
+                <Card key={task.id} className="hover:bg-muted/30 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold">{task.name}</h4>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground mt-1">
+                          <span>Created {formatDistanceToNow(new Date(task.createdAt))} ago</span>
+                          {task.dueDate && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> 
+                              Due {new Date(task.dueDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {getStatusBadge(task.status)}
+                        <Link to={`/rfts/${task.id}`}>
+                          <Button variant="outline" size="sm" className="gap-1">
+                            View <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
