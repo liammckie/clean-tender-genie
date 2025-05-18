@@ -67,23 +67,6 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, data: parsed }),
-=======
-    // Placeholder analysis logic. In a real implementation this would call
-    // Vertex AI Gemini Pro 2.5 to analyse the tender document text.
-    const summary = text.split('\n')[0].slice(0, 200);
-
-    const response = {
-      summary,
-      legalRequirements: ['Comply with WHS Act 2011', 'Meet environmental regulations'],
-      operationalNeeds: ['Provide cleaning schedule', 'Supply trained staff'],
-      estimationConsiderations: ['Include labour and materials', 'Allow for peak period costs'],
-      keyCriteria: ['Experience', 'Capability', 'Value'],
-      winThemes: ['Quality service', 'Cost effective', 'Reliability']
-    };
-
-    return new Response(
-      JSON.stringify({ success: true, data: response }),
-
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
