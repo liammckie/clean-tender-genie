@@ -25,6 +25,7 @@ describe('FileUploader minimal render', () => {
 describe('FileUploader', () => {
   const mockSetStatus = vi.fn();
   const mockSetStoreId = vi.fn();
+  const mockSetTaskId = vi.fn();
   const mockSetError = vi.fn();
   const mockOnUploaded = vi.fn();
 
@@ -36,15 +37,17 @@ describe('FileUploader', () => {
       status: 'idle',
       error: null,
       storeId: null,
+      taskId: null,
       setStatus: mockSetStatus,
       setStoreId: mockSetStoreId,
+      setTaskId: mockSetTaskId,
       setError: mockSetError,
     });
 
     // Mock fetch response
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ storeId: 'test-store-id' }),
+      json: () => Promise.resolve({ storeId: 'test-store-id', taskId: 'test-task-id' }),
     });
   });
 
@@ -128,6 +131,7 @@ describe('FileUploader', () => {
 
       expect(mockSetStatus).toHaveBeenCalledWith('uploaded');
       expect(mockSetStoreId).toHaveBeenCalledWith('test-store-id');
+      expect(mockSetTaskId).toHaveBeenCalledWith('test-task-id');
       expect(mockOnUploaded).toHaveBeenCalledWith('test-store-id');
     });
   });

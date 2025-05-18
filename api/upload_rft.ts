@@ -1,4 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { createClient } from '@supabase/supabase-js';
+import formidable, { File } from 'formidable';
+import fs from 'fs';
+import { randomUUID } from 'crypto';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,13 +35,72 @@ export default async function handler(
   }
 
   try {
-    // TODO: Implement file upload handling logic
-    // TODO: Validate file type and size server-side
-    // TODO: Store the file in Supabase Storage
-    // TODO: Create RFT task record in database
+    const form = new formidable.IncomingForm();
+    const { files } = await new Promise<{
+      fields: formidable.Fields;
+      files: formidable.Files;
+    }>((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) return reject(err);
+        resolve({ fields, files });
+      });
+    });
 
-    // For now, just return a mock response
-    return res.status(200).json({ storeId: `rft-${Date.now()}` });
+    const uploaded = files.file as File | undefined;
+    if (!uploaded) {
+      return res.status(400).json({ message: 'File not provided' });
+    }
+
+    const ACCEPTED_TYPES = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+
+    if (!uploaded.mimetype || !ACCEPTED_TYPES.includes(uploaded.mimetype)) {
+      return res.status(400).json({ message: 'Invalid file type' });
+    }
+    if (uploaded.size && uploaded.size > MAX_SIZE) {
+      return res.status(400).json({ message: 'File size exceeds limit' });
+    }
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const fileExt = uploaded.originalFilename?.split('.').pop() || 'dat';
+    const fileName = `${randomUUID()}.${fileExt}`;
+
+    const { data: storeData, error: uploadError } = await supabase.storage
+      .from('rft-uploads')
+      .upload(fileName, fs.createReadStream(uploaded.filepath), {
+        contentType: uploaded.mimetype || undefined,
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      throw new Error(uploadError.message);
+    }
+
+    const path = storeData?.path || fileName;
+
+    const { data: taskData, error: taskError } = await supabase
+      .from('rft_tasks')
+      .insert({
+        name: uploaded.originalFilename,
+        status: 'pending',
+        rftFileId: path,
+      })
+      .select()
+      .single();
+
+    if (taskError) {
+      console.error('Supabase insert error:', taskError);
+      throw new Error(taskError.message);
+    }
+
+    return res.status(200).json({ storeId: path, taskId: taskData.id });
   } catch (error: any) {
     console.error('Error uploading RFT:', error);
     return res

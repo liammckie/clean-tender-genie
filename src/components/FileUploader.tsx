@@ -17,7 +17,7 @@ const MAX_SIZE = 20 * 1024 * 1024; // 20MB
 export const FileUploader: React.FC<FileUploaderProps> = ({ onUploaded }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
-  const { status, setStatus, setStoreId, setError, error } = useAppStore();
+  const { status, setStatus, setStoreId, setTaskId, setError, error } = useAppStore();
   const [filename, setFilename] = useState<string | null>(null);
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,6 +38,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploaded }) => {
   function validateAndUpload(file: File) {
     setError(null);
     setStoreId(null);
+    setTaskId(null);
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
       setError('Only PDF or DOCX files are allowed.');
@@ -88,6 +89,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploaded }) => {
       setProgress(100);
       setStatus('uploaded');
       setStoreId(data.storeId);
+      if (data.taskId) setTaskId(data.taskId);
       if (onUploaded) onUploaded(data.storeId);
     } catch (err: any) {
       setStatus('error');
@@ -99,6 +101,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploaded }) => {
   function resetUpload() {
     setStatus('idle');
     setStoreId(null);
+    setTaskId(null);
     setError(null);
     setProgress(0);
     setFilename(null);
