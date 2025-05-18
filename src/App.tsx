@@ -3,6 +3,7 @@ import React from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
+  useRouteError,
 } from "react-router-dom";
 import DocumentEditor from './pages/DocumentEditor';
 import DmsHome from './pages/DmsHome';
@@ -16,6 +17,15 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import GoogleDriveTestPage from './pages/GoogleDriveTestPage';
 import AdminRouter from './pages/AdminRouter';
+import NotFound from './pages/NotFound';
+
+// Custom error boundary component
+const ErrorBoundary = () => {
+  const error = useRouteError();
+  console.error("Route error:", error);
+  
+  return <NotFound />;
+};
 
 const App: React.FC = () => {
   const { isLoggedIn } = useAuth();
@@ -25,6 +35,7 @@ const App: React.FC = () => {
     {
       path: "/",
       element: isLoggedIn ? <Home /> : <LoginPage />,
+      errorElement: <ErrorBoundary />,
     },
     {
       path: "/login",
@@ -76,6 +87,10 @@ const App: React.FC = () => {
       path: "/admin/*",
       element: <AdminRouter />
     },
+    {
+      path: "*",
+      element: <NotFound />
+    }
   ]);
 
   return (
