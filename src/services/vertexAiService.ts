@@ -28,5 +28,23 @@ export const vertexAiService = {
     }
 
     return data.data as TenderAnalysis;
+
+  },
+
+  async draftTender(text: string): Promise<string> {
+    const response = await supabase.functions.invoke('vertex-draft', {
+      body: { text }
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message || 'Failed to draft tender');
+    }
+
+    const data = response.data;
+    if (!data || !data.success || !data.data) {
+      throw new Error('Invalid draft response');
+    }
+
+    return data.data.draft as string;
   }
 };

@@ -1,6 +1,8 @@
-# Welcome to your Lovable project
+# Clean Tender Genie
 
 ## Project info
+
+This repository contains a React + TypeScript application generated with [Lovable](https://lovable.dev/).  It is bootstrapped with [Vite](https://vitejs.dev/) and uses [Tailwind CSS](https://tailwindcss.com/) together with [shadcn-ui](https://ui.shadcn.com/) components.
 
 **URL**: https://lovable.dev/projects/66fb8ab6-99df-4403-9a8c-5c58290178fc
 
@@ -18,7 +20,7 @@ Changes made via Lovable will be committed automatically to this repo.
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The only requirement is having Node.js (version 20 or newer) and npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 Follow these steps:
 
@@ -30,10 +32,14 @@ git clone <YOUR_GIT_URL>
 cd <YOUR_PROJECT_NAME>
 
 # Step 3: Install the necessary dependencies.
-npm i
+npm install
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+
+# Step 5: Run lint checks and tests (optional).
+npm run lint
+npm run test
 ```
 
 **Edit a file directly in GitHub**
@@ -52,13 +58,28 @@ npm run dev
 
 ## What technologies are used for this project?
 
-This project is built with:
+Core stack:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- [Vite](https://vitejs.dev/) for building and serving the app
+- [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/) with [shadcn-ui](https://ui.shadcn.com/)
+- [Supabase](https://supabase.com/) with edge functions located in `supabase/functions`
+
+Key runtime packages (see `package.json` for full list):
+
+- `react` `18.3.x`
+- `@supabase/supabase-js` `2.49.x`
+- `@genkit-ai/ai` `1.9.x`
+- `zustand` `5.x`
+
+### Testing
+
+To execute the unit tests and run the linter:
+
+```sh
+npm run lint
+npm run test
+```
 
 ## How can I deploy this project?
 

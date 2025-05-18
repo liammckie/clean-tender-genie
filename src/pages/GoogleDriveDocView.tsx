@@ -27,6 +27,9 @@ const GoogleDriveDocView = () => {
   const [error, setError] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<TenderAnalysis | null>(null);
+  const [drafting, setDrafting] = useState(false);
+  const [draft, setDraft] = useState<string | null>(null);
+  const [savingDraft, setSavingDraft] = useState(false);
 
   useEffect(() => {
     async function fetchDocument() {
@@ -288,6 +291,7 @@ const GoogleDriveDocView = () => {
                       try {
                         setAnalyzing(true);
                         setAnalysis(null);
+
                         const text = atob(fileData.content);
                         const result = await vertexAiService.analyzeTender(text);
                         setAnalysis(result);
@@ -310,6 +314,32 @@ const GoogleDriveDocView = () => {
                   >
                     <Wand2 className="h-4 w-4" />
                     {analyzing ? 'Analysing...' : 'Analyse'}
+                  </Button>
+                )}
+
+                {fileData.content && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={async () => {
+                      if (!fileData.content) return;
+                      try {
+                        setDrafting(true);
+                        const text = atob(fileData.content);
+                        const result = await vertexAiService.draftTender(text);
+                        setDraft(result);
+                        toast({ title: 'Draft created', description: 'Tender draft generated' });
+                      } catch (err: any) {
+                        console.error('Draft error:', err);
+                        toast({ title: 'Draft failed', description: err.message || 'Unable to draft tender', variant: 'destructive' });
+                      } finally {
+                        setDrafting(false);
+                      }
+                    }}
+                    disabled={drafting}
+                  >
+                    <Wand2 className="h-4 w-4" />
+                    {drafting ? 'Drafting...' : 'Draft Tender'}
                   </Button>
                 )}
               </div>
@@ -365,6 +395,35 @@ const GoogleDriveDocView = () => {
                     ))}
                   </ul>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+          {draft && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Tender Draft</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <pre className="whitespace-pre-wrap text-sm">{draft}</pre>
+                <Button
+                  onClick={async () => {
+                    if (!fileData) return;
+                    try {
+                      setSavingDraft(true);
+                      const doc = await googleDriveService.createGoogleDoc(`${fileData.name} Draft`);
+                      await googleDriveService.updateGoogleDoc(doc.id, draft);
+                      toast({ title: 'Draft saved', description: 'Google Doc created' });
+                    } catch (err: any) {
+                      console.error('Save draft error:', err);
+                      toast({ title: 'Save failed', description: err.message || 'Unable to save draft', variant: 'destructive' });
+                    } finally {
+                      setSavingDraft(false);
+                    }
+                  }}
+                  disabled={savingDraft}
+                >
+                  {savingDraft ? 'Saving...' : 'Save Draft to Google Docs'}
+                </Button>
               </CardContent>
             </Card>
           )}
