@@ -132,6 +132,39 @@ describe('FileUploader', () => {
     });
   });
 
+  it('resets state when "Upload Another" is clicked after a successful upload', async () => {
+    render(<FileUploader onUploaded={mockOnUploaded} />);
+
+    const file = new File(['dummy content'], 'test.pdf', {
+      type: 'application/pdf',
+    });
+    const inputEl = screen.getByRole('button');
+
+    fireEvent.drop(inputEl, {
+      dataTransfer: {
+        files: [file],
+      },
+    });
+
+    // Wait for upload to complete and success UI to appear
+    await waitFor(() => {
+      expect(mockSetStatus).toHaveBeenCalledWith('uploaded');
+    });
+
+    const uploadAnother = screen.getByText(/Upload Another/i);
+    fireEvent.click(uploadAnother);
+
+    expect(mockSetStatus).toHaveBeenCalledWith('idle');
+    // Dropzone should be visible again and filename removed
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Drag & drop PDF or DOCX here/i)
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText('test.pdf')).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
   it('handles upload error correctly', async () => {
     // Mock fetch to return an error
     global.fetch = vi.fn().mockResolvedValue({
