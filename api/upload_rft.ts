@@ -12,6 +12,7 @@ export const config = {
     bodyParser: false,
   },
 };
+import { validateEnvVars } from './utils';
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,9 +24,7 @@ export default async function handler(
     'SUPABASE_URL',
     'SUPABASE_SERVICE_ROLE_KEY',
   ];
-  const missingEnvVars = requiredEnvVars.filter(
-    (varName) => !process.env[varName]
-  );
+  const missingEnvVars = validateEnvVars(requiredEnvVars);
 
   if (missingEnvVars.length > 0) {
     return res.status(500).json({
