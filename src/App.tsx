@@ -20,6 +20,7 @@ import AdminRouter from './pages/AdminRouter';
 const App: React.FC = () => {
   const { isLoggedIn } = useAuth();
 
+  // Define route configuration for React Router v7
   const router = createBrowserRouter([
     {
       path: "/",
@@ -46,7 +47,7 @@ const App: React.FC = () => {
       element: <DmsRouter />,
       children: [
         {
-          path: "/dms",
+          index: true,
           element: <DmsHome />,
         },
         {
@@ -72,7 +73,7 @@ const App: React.FC = () => {
       element: <RftTaskDetail />
     },
     {
-      path: "/admin",
+      path: "/admin/*",
       element: <AdminRouter />
     },
   ]);
