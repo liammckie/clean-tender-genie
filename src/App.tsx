@@ -15,6 +15,7 @@ import RftTaskDetail from './pages/RftTaskDetail';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import GoogleDriveTestPage from './pages/GoogleDriveTestPage';
+import AdminRouter from './pages/AdminRouter';
 
 const App: React.FC = () => {
   const { isLoggedIn } = useAuth();
@@ -31,6 +32,14 @@ const App: React.FC = () => {
     {
       path: "/signup",
       element: <SignupPage />,
+    },
+    {
+      path: "/document-editor",
+      element: <DocumentEditor />,
+    },
+    {
+      path: "/document-editor/:id",
+      element: <DocumentEditor />,
     },
     {
       path: "/dms",
@@ -61,6 +70,10 @@ const App: React.FC = () => {
     {
       path: "/rfts/:id",
       element: <RftTaskDetail />
+    },
+    {
+      path: "/admin",
+      element: <AdminRouter />
     },
   ]);
 
