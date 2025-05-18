@@ -92,3 +92,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Serverless environment variables
+
+The Supabase functions rely on a Google service account JSON key. Provide it via the `GOOGLE_SERVICE_ACCOUNT` environment variable. The Vertex AI review function also respects an optional `VERTEX_LOCATION` variable to override the Google Cloud region (defaults to `us-central1`).

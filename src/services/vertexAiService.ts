@@ -28,6 +28,7 @@ export const vertexAiService = {
     }
 
     return data.data as TenderAnalysis;
+
   },
 
   async draftTender(text: string): Promise<string> {

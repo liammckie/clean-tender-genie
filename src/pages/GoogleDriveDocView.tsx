@@ -291,7 +291,7 @@ const GoogleDriveDocView = () => {
                       try {
                         setAnalyzing(true);
                         setAnalysis(null);
-                        setDraft(null);
+
                         const text = atob(fileData.content);
                         const result = await vertexAiService.analyzeTender(text);
                         setAnalysis(result);
@@ -316,6 +316,7 @@ const GoogleDriveDocView = () => {
                     {analyzing ? 'Analysing...' : 'Analyse'}
                   </Button>
                 )}
+
                 {fileData.content && (
                   <Button
                     variant="outline"
