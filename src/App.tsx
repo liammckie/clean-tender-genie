@@ -15,7 +15,7 @@ import { useAuth } from './contexts/AuthContext';
 import RftTaskDetail from './pages/RftTaskDetail';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import GoogleDriveTestPage from './pages/GoogleDriveTestPage';
+import GoogleDriveTest from './pages/GoogleDriveTest';
 import AdminRouter from './pages/AdminRouter';
 import NotFound from './pages/NotFound';
 
@@ -73,7 +73,7 @@ const App: React.FC = () => {
     },
     {
       path: "/google-drive",
-      element: <GoogleDriveTestPage />
+      element: <GoogleDriveTest />
     },
     {
       path: "/rfts",
