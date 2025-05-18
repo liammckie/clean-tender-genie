@@ -3,6 +3,7 @@ import React from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
+  useRouteError,
 } from "react-router-dom";
 import DocumentEditor from './pages/DocumentEditor';
 import DmsHome from './pages/DmsHome';
@@ -15,14 +16,26 @@ import RftTaskDetail from './pages/RftTaskDetail';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import GoogleDriveTestPage from './pages/GoogleDriveTestPage';
+import AdminRouter from './pages/AdminRouter';
+import NotFound from './pages/NotFound';
+
+// Custom error boundary component
+const ErrorBoundary = () => {
+  const error = useRouteError();
+  console.error("Route error:", error);
+  
+  return <NotFound />;
+};
 
 const App: React.FC = () => {
   const { isLoggedIn } = useAuth();
 
+  // Define route configuration for React Router v7
   const router = createBrowserRouter([
     {
       path: "/",
       element: isLoggedIn ? <Home /> : <LoginPage />,
+      errorElement: <ErrorBoundary />,
     },
     {
       path: "/login",
@@ -33,11 +46,19 @@ const App: React.FC = () => {
       element: <SignupPage />,
     },
     {
+      path: "/document-editor",
+      element: <DocumentEditor />,
+    },
+    {
+      path: "/document-editor/:id",
+      element: <DocumentEditor />,
+    },
+    {
       path: "/dms",
       element: <DmsRouter />,
       children: [
         {
-          path: "/dms",
+          index: true,
           element: <DmsHome />,
         },
         {
@@ -62,6 +83,14 @@ const App: React.FC = () => {
       path: "/rfts/:id",
       element: <RftTaskDetail />
     },
+    {
+      path: "/admin/*",
+      element: <AdminRouter />
+    },
+    {
+      path: "*",
+      element: <NotFound />
+    }
   ]);
 
   return (
