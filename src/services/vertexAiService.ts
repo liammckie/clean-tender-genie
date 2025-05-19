@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { handleSupabaseResponse } from './supabaseHelpers';
 
 export interface TenderAnalysis {
   summary: string;
@@ -12,39 +13,22 @@ export interface TenderAnalysis {
 export const vertexAiService = {
   async analyzeTender(text: string): Promise<TenderAnalysis> {
     const response = await supabase.functions.invoke('vertex-review', {
-      body: {
-        action: 'analyzeTender',
-        text
-      }
+      body: { action: 'analyzeTender', text },
     });
-
-    if (response.error) {
-      throw new Error(response.error.message || 'Failed to analyze tender');
-    }
-
-    const data = response.data;
-    if (!data || !data.success || !data.data) {
-      throw new Error('Invalid analysis response');
-    }
-
-    return data.data as TenderAnalysis;
-
+    return handleSupabaseResponse<TenderAnalysis>(
+      response,
+      'Failed to analyze tender',
+    );
   },
 
   async draftTender(text: string): Promise<string> {
     const response = await supabase.functions.invoke('vertex-draft', {
-      body: { text }
+      body: { text },
     });
-
-    if (response.error) {
-      throw new Error(response.error.message || 'Failed to draft tender');
-    }
-
-    const data = response.data;
-    if (!data || !data.success || !data.data) {
-      throw new Error('Invalid draft response');
-    }
-
-    return data.data.draft as string;
-  }
+    const data = handleSupabaseResponse<{ draft: string }>(
+      response,
+      'Failed to draft tender',
+    );
+    return data.draft;
+  },
 };
