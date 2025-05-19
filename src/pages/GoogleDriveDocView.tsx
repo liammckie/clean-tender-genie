@@ -1,80 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, ExternalLink, FileText, Loader, Wand2 } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { googleDriveService } from '@/services/googleDriveService';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { vertexAiService, TenderAnalysis } from '@/services/vertexAiService';
+import { TenderAnalysis } from "@/services/vertexAiService";
+import { useDriveDocument } from "@/hooks/useDriveDocument";
+import { useTenderAi } from "@/hooks/useTenderAi";
 
 const GoogleDriveDocView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [fileData, setFileData] = useState<{
-    id: string;
-    name: string;
-    mimeType: string;
-    originalMimeType?: string;
-    content?: string;
-    webViewLink?: string;
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<TenderAnalysis | null>(null);
-  const [drafting, setDrafting] = useState(false);
-  const [draft, setDraft] = useState<string | null>(null);
-  const [savingDraft, setSavingDraft] = useState(false);
-
-  useEffect(() => {
-    async function fetchDocument() {
-      if (!id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // First get the metadata
-        const metadata = await googleDriveService.getFileMetadata(id);
-        console.log('File metadata:', metadata);
-        
-        // Then download the content if it's a supported type
-        if (metadata) {
-          // For all files, try to download/export
-          try {
-            const fileWithContent = await googleDriveService.downloadFile(id);
-            setFileData(fileWithContent);
-          } catch (contentError) {
-            console.error('Error downloading file content:', contentError);
-            // Still set the metadata even if content download fails
-            setFileData(metadata);
-            toast({
-              title: 'Content preview unavailable',
-              description: 'Only metadata could be retrieved for this file',
-              variant: 'destructive',
-            });
-          }
-        }
-      } catch (err: any) {
-        console.error('Error fetching document:', err);
-        setError(err.message || 'Failed to fetch document');
-        toast({
-          title: 'Error',
-          description: err.message || 'Failed to fetch document',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDocument();
-  }, [id, toast]);
+  const { loading, fileData, error } = useDriveDocument(id);
+  const { analyzing, analysis, draft, drafting, saving, analyze, draftTender, saveDraft } = useTenderAi();
 
   const renderContent = () => {
     if (!fileData?.content) {
@@ -289,12 +232,7 @@ const GoogleDriveDocView = () => {
                     onClick={async () => {
                       if (!fileData.content) return;
                       try {
-                        setAnalyzing(true);
-                        setAnalysis(null);
-
-                        const text = atob(fileData.content);
-                        const result = await vertexAiService.analyzeTender(text);
-                        setAnalysis(result);
+                        await analyze(atob(fileData.content));
                         toast({
                           title: 'Analysis complete',
                           description: 'Tender review generated'
@@ -306,9 +244,6 @@ const GoogleDriveDocView = () => {
                           description: err.message || 'Unable to analyse document',
                           variant: 'destructive'
                         });
-                      } finally {
-                        setAnalyzing(false);
-                      }
                     }}
                     disabled={analyzing}
                   >
@@ -324,17 +259,11 @@ const GoogleDriveDocView = () => {
                     onClick={async () => {
                       if (!fileData.content) return;
                       try {
-                        setDrafting(true);
-                        const text = atob(fileData.content);
-                        const result = await vertexAiService.draftTender(text);
-                        setDraft(result);
+                        await draftTender(atob(fileData.content));
                         toast({ title: 'Draft created', description: 'Tender draft generated' });
                       } catch (err: any) {
                         console.error('Draft error:', err);
                         toast({ title: 'Draft failed', description: err.message || 'Unable to draft tender', variant: 'destructive' });
-                      } finally {
-                        setDrafting(false);
-                      }
                     }}
                     disabled={drafting}
                   >
@@ -409,20 +338,15 @@ const GoogleDriveDocView = () => {
                   onClick={async () => {
                     if (!fileData) return;
                     try {
-                      setSavingDraft(true);
-                      const doc = await googleDriveService.createGoogleDoc(`${fileData.name} Draft`);
-                      await googleDriveService.updateGoogleDoc(doc.id, draft);
+                      await saveDraft(`${fileData.name} Draft`, draft!);
                       toast({ title: 'Draft saved', description: 'Google Doc created' });
                     } catch (err: any) {
                       console.error('Save draft error:', err);
                       toast({ title: 'Save failed', description: err.message || 'Unable to save draft', variant: 'destructive' });
-                    } finally {
-                      setSavingDraft(false);
-                    }
                   }}
-                  disabled={savingDraft}
+                  disabled={saving}
                 >
-                  {savingDraft ? 'Saving...' : 'Save Draft to Google Docs'}
+                  {saving ? 'Saving...' : 'Save Draft to Google Docs'}
                 </Button>
               </CardContent>
             </Card>
