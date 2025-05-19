@@ -14,6 +14,20 @@ async function handleResponse<T>(res: Response, defaultMessage: string): Promise
   return res.json();
 }
 
+async function handleResponse<T>(res: Response, defaultMessage: string): Promise<T> {
+  if (!res.ok) {
+    let body;
+    try {
+      body = await res.json();
+    } catch {
+      body = { message: res.statusText || defaultMessage };
+    }
+    throw new Error(body.message || defaultMessage);
+  }
+
+  return res.json();
+}
+
 export async function fetchJson<T = any>(
   path: string,
   options?: RequestInit
