@@ -1,6 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+export enum GoogleDriveAction {
+  ListFiles = 'listFiles',
+  GetFileMetadata = 'getFileMetadata',
+  DownloadFile = 'downloadFile',
+  CreateGoogleDoc = 'createGoogleDoc',
+  UpdateGoogleDoc = 'updateGoogleDoc',
+}
+
 type GoogleDriveFile = {
   id: string;
   name: string;
@@ -24,7 +32,7 @@ export const googleDriveService = {
     try {
       const response = await supabase.functions.invoke('google-drive', {
         body: {
-          action: 'listFiles',
+          action: GoogleDriveAction.ListFiles,
           folderId
         }
       });
@@ -67,7 +75,7 @@ export const googleDriveService = {
     try {
       const response = await supabase.functions.invoke('google-drive', {
         body: {
-          action: 'getFileMetadata',
+          action: GoogleDriveAction.GetFileMetadata,
           fileId
         }
       });
@@ -106,7 +114,7 @@ export const googleDriveService = {
     try {
       const response = await supabase.functions.invoke('google-drive', {
         body: {
-          action: 'downloadFile',
+          action: GoogleDriveAction.DownloadFile,
           fileId
         }
       });
@@ -144,7 +152,7 @@ export const googleDriveService = {
     try {
       const response = await supabase.functions.invoke('google-drive', {
         body: {
-          action: 'createGoogleDoc',
+          action: GoogleDriveAction.CreateGoogleDoc,
           fileName,
           folderId
         }
@@ -183,7 +191,7 @@ export const googleDriveService = {
     try {
       const response = await supabase.functions.invoke('google-drive', {
         body: {
-          action: 'updateGoogleDoc',
+          action: GoogleDriveAction.UpdateGoogleDoc,
           fileId,
           content
         }
@@ -214,3 +222,4 @@ export const googleDriveService = {
 };
 
 export type { GoogleDriveFile };
+export { GoogleDriveAction };

@@ -1,5 +1,19 @@
 const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE || '';
 
+async function handleResponse<T>(res: Response, defaultMessage: string): Promise<T> {
+  if (!res.ok) {
+    let body;
+    try {
+      body = await res.json();
+    } catch {
+      body = { message: res.statusText || defaultMessage };
+    }
+    throw new Error(body.message || defaultMessage);
+  }
+
+  return res.json();
+}
+
 export async function fetchJson<T = any>(
   path: string,
   options?: RequestInit
@@ -9,18 +23,7 @@ export async function fetchJson<T = any>(
     : path;
 
   const res = await fetch(url, options);
-
-  if (!res.ok) {
-    let body;
-    try {
-      body = await res.json();
-    } catch {
-      body = { message: res.statusText || 'An unexpected error occurred' };
-    }
-    throw new Error(body.message || 'Unexpected error');
-  }
-
-  return res.json();
+  return handleResponse(res, 'Unexpected error');
 }
 
 export async function uploadFile(
@@ -62,17 +65,8 @@ export async function uploadFile(
       stopProgress();
       onProgress(100);
 
-      if (!res.ok) {
-        let body;
-        try {
-          body = await res.json();
-        } catch {
-          body = { message: res.statusText || 'An unexpected error occurred' };
-        }
-        throw new Error(body.message || 'Upload failed');
-      }
-
-      return res.json();
+      const result = await handleResponse(res, 'Upload failed');
+      return result;
     } catch (error) {
       stopProgress();
       throw error;
@@ -85,15 +79,5 @@ export async function uploadFile(
     body: formData,
   });
 
-  if (!res.ok) {
-    let body;
-    try {
-      body = await res.json();
-    } catch {
-      body = { message: res.statusText || 'An unexpected error occurred' };
-    }
-    throw new Error(body.message || 'Upload failed');
-  }
-
-  return res.json();
+  return handleResponse(res, 'Upload failed');
 }
