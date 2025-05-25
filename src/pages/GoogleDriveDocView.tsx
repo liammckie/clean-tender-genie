@@ -244,6 +244,7 @@ const GoogleDriveDocView = () => {
                           description: err.message || 'Unable to analyse document',
                           variant: 'destructive'
                         });
+                      }
                     }}
                     disabled={analyzing}
                   >
@@ -264,6 +265,7 @@ const GoogleDriveDocView = () => {
                       } catch (err: any) {
                         console.error('Draft error:', err);
                         toast({ title: 'Draft failed', description: err.message || 'Unable to draft tender', variant: 'destructive' });
+                      }
                     }}
                     disabled={drafting}
                   >
@@ -274,87 +276,90 @@ const GoogleDriveDocView = () => {
               </div>
             </CardFooter>
           </Card>
-          {analysis && (
-            <Card className="mt-4">
-              <CardHeader>
-                <CardTitle>Tender Analysis</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-medium">Summary</h3>
-                  <p className="text-sm mt-1">{analysis.summary}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium">Legal Requirements</h3>
-                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                    {analysis.legalRequirements.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-medium">Operational Needs</h3>
-                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                    {analysis.operationalNeeds.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-medium">Estimation Considerations</h3>
-                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                    {analysis.estimationConsiderations.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-medium">Key Criteria</h3>
-                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                    {analysis.keyCriteria.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-medium">Win Themes</h3>
-                  <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-                    {analysis.winThemes.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {draft && (
-            <Card className="mt-4">
-              <CardHeader>
-                <CardTitle>Tender Draft</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <pre className="whitespace-pre-wrap text-sm">{draft}</pre>
-                <Button
-                  onClick={async () => {
-                    if (!fileData) return;
-                    try {
-                      await saveDraft(`${fileData.name} Draft`, draft!);
-                      toast({ title: 'Draft saved', description: 'Google Doc created' });
-                    } catch (err: any) {
-                      console.error('Save draft error:', err);
-                      toast({ title: 'Save failed', description: err.message || 'Unable to save draft', variant: 'destructive' });
-                  }}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Draft to Google Docs'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
         ) : (
           <Card>
             <CardContent className="py-10 text-center">
               <p>No document found.</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {analysis && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Tender Analysis</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="font-medium">Summary</h3>
+                <p className="text-sm mt-1">{analysis.summary}</p>
+              </div>
+              <div>
+                <h3 className="font-medium">Legal Requirements</h3>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  {analysis.legalRequirements.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium">Operational Needs</h3>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  {analysis.operationalNeeds.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium">Estimation Considerations</h3>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  {analysis.estimationConsiderations.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium">Key Criteria</h3>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  {analysis.keyCriteria.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium">Win Themes</h3>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  {analysis.winThemes.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {draft && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Tender Draft</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <pre className="whitespace-pre-wrap text-sm">{draft}</pre>
+              <Button
+                onClick={async () => {
+                  if (!fileData) return;
+                  try {
+                    await saveDraft(`${fileData.name} Draft`, draft!);
+                    toast({ title: 'Draft saved', description: 'Google Doc created' });
+                  } catch (err: any) {
+                    console.error('Save draft error:', err);
+                    toast({ title: 'Save failed', description: err.message || 'Unable to save draft', variant: 'destructive' });
+                  }
+                }}
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : 'Save Draft to Google Docs'}
+              </Button>
             </CardContent>
           </Card>
         )}
