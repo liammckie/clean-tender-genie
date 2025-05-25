@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -13,11 +12,11 @@ interface AIAssistantPanelProps {
   llmConfig: LLMConfig;
 }
 
-const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
+const AIAssistantPanel = ({
   documentContent,
   setDocumentContent,
   llmConfig,
-}) => {
+}: AIAssistantPanelProps) => {
   const [prompt, setPrompt] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);

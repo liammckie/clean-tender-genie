@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Save, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
-const DocumentEditorToolbar: React.FC = () => {
+const DocumentEditorToolbar = () => {
   return (
     <div className="flex items-center bg-white border rounded-md shadow-sm p-1 mb-4 overflow-x-auto">
       <Button variant="ghost" size="sm">
