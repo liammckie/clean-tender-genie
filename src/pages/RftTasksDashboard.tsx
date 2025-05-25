@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppStore } from '@/hooks/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +7,7 @@ import Layout from '../components/layout/Layout';
 import { FileUploader } from '../components/FileUploader';
 import { Button } from '@/components/ui/button';
 import { fetchJson } from '@/utils/api';
-import { Loader, FileText, Upload, Download, File, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader, FileText, Upload, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -29,12 +30,11 @@ interface GenerateResponse {
 }
 
 const RftTasksDashboard = () => {
-  const { storeId, status, error } = useAppStore();
+  const { storeId, status } = useAppStore();
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(null);
   const [selectedOutputFolder, setSelectedOutputFolder] = useState<GoogleDriveFile | null>(null);
-  const [uploadMethod, setUploadMethod] = useState<'local' | 'gdrive'>('local');
   const [tasks, setTasks] = useState<RftTask[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
 
@@ -154,7 +154,7 @@ const RftTasksDashboard = () => {
             <CardDescription>Upload an RFT document or select one from Google Drive</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs defaultValue="local" onValueChange={(v) => setUploadMethod(v as 'local' | 'gdrive')}>
+            <Tabs defaultValue="local">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="local">Upload Local File</TabsTrigger>
                 <TabsTrigger value="gdrive">Select from Google Drive</TabsTrigger>

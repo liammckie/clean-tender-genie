@@ -1,18 +1,17 @@
-export interface SupabaseResponse<T> {
-  data?: { success?: boolean; data?: T };
-  error?: { message?: string };
-}
+
+import { FunctionsResponse } from '@supabase/supabase-js';
 
 export function handleSupabaseResponse<T>(
-  response: SupabaseResponse<T>,
+  response: FunctionsResponse<T>,
   errorMessage: string,
 ): T {
   if (response.error) {
     throw new Error(response.error.message || errorMessage);
   }
-  const data = response.data;
-  if (!data || !data.success || data.data === undefined) {
+  
+  if (!response.data) {
     throw new Error(errorMessage);
   }
-  return data.data as T;
+  
+  return response.data;
 }

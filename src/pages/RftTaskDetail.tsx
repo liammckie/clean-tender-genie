@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { RftTask, rftTaskService } from '@/services/rftTaskService';
-import { ArrowLeft, Clock, CheckCircle, Loader, AlertCircle, ExternalLink, Download, FileText } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, Loader, AlertCircle, Download, FileText } from 'lucide-react';
 
 const RftTaskDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -197,12 +198,6 @@ const RftTaskDetail = () => {
                 )}
               </CardFooter>
             </Card>
-            
-            {/* Additional sections can be added here for:
-                - Compliance requirements extracted from the RFT
-                - Progress tracking through the workflow steps
-                - Review comments/feedback
-                - Validation results */}
           </>
         ) : (
           <Card>

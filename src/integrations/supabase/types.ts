@@ -9,7 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      rft_tasks: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          name: string
+          output_file_id: string | null
+          rft_file_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          name: string
+          output_file_id?: string | null
+          rft_file_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          name?: string
+          output_file_id?: string | null
+          rft_file_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

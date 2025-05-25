@@ -1,18 +1,5 @@
+
 const BASE_URL = import.meta.env.VITE_API_BASE || '';
-
-async function handleResponse<T>(res: Response, defaultMessage: string): Promise<T> {
-  if (!res.ok) {
-    let body;
-    try {
-      body = await res.json();
-    } catch {
-      body = { message: res.statusText || defaultMessage };
-    }
-    throw new Error(body.message || defaultMessage);
-  }
-
-  return res.json();
-}
 
 async function handleResponse<T>(res: Response, defaultMessage: string): Promise<T> {
   if (!res.ok) {

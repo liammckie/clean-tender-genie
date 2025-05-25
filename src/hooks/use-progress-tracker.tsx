@@ -1,38 +1,62 @@
-import { useState, useEffect } from 'react';
 
-interface ProgressTracking {
-  [key: string]: boolean; // path: visited
+import { useState } from 'react';
+
+export interface ProgressStep {
+  id: string;
+  name: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'error';
+  description?: string;
 }
 
-export function useProgressTracker() {
-  const [visitedPages, setVisitedPages] = useState<ProgressTracking>(() => {
-    const savedProgress = localStorage.getItem('knowledge_progress');
-    return savedProgress ? JSON.parse(savedProgress) : {};
-  });
+export function useProgressTracker(initialSteps: ProgressStep[]) {
+  const [steps, setSteps] = useState<ProgressStep[]>(initialSteps);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  const markPageVisited = (path: string) => {
-    setVisitedPages((prev) => {
-      const updated = { ...prev, [path]: true };
-      localStorage.setItem('knowledge_progress', JSON.stringify(updated));
-      return updated;
-    });
+  const updateStepStatus = (stepId: string, status: ProgressStep['status']) => {
+    setSteps(prevSteps =>
+      prevSteps.map(step =>
+        step.id === stepId ? { ...step, status } : step
+      )
+    );
   };
 
-  const getProgress = (paths: string[]) => {
-    if (paths.length === 0) return 0;
-    const visitedCount = paths.filter((path) => visitedPages[path]).length;
-    return (visitedCount / paths.length) * 100;
+  const nextStep = () => {
+    setCurrentStepIndex(prev => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const previousStep = () => {
+    setCurrentStepIndex(prev => Math.max(prev - 1, 0));
+  };
+
+  const goToStep = (index: number) => {
+    setCurrentStepIndex(Math.max(0, Math.min(index, steps.length - 1)));
   };
 
   const resetProgress = () => {
-    localStorage.removeItem('knowledge_progress');
-    setVisitedPages({});
+    setSteps(prevSteps =>
+      prevSteps.map(step => ({ ...step, status: 'pending' }))
+    );
+    setCurrentStepIndex(0);
   };
 
+  const currentStep = steps[currentStepIndex];
+  const isFirstStep = currentStepIndex === 0;
+  const isLastStep = currentStepIndex === steps.length - 1;
+  const completedStepsCount = steps.filter(step => step.status === 'completed').length;
+  const progressPercentage = (completedStepsCount / steps.length) * 100;
+
   return {
-    visitedPages,
-    markPageVisited,
-    getProgress,
+    steps,
+    currentStep,
+    currentStepIndex,
+    isFirstStep,
+    isLastStep,
+    completedStepsCount,
+    progressPercentage,
+    updateStepStatus,
+    nextStep,
+    previousStep,
+    goToStep,
     resetProgress,
   };
 }

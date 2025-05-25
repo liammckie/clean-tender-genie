@@ -1,36 +1,45 @@
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useProgressTracker } from '@/hooks/use-progress-tracker';
+
+import { CheckCircle, Circle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ProgressIndicatorProps {
-  sections: string[];
+  totalSteps: number;
+  currentStep: number;
+  completedSteps?: number[];
+  className?: string;
 }
 
-const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ sections }) => {
-  const location = useLocation();
-  const { visitedPages, markPageVisited, getProgress } = useProgressTracker();
-  const progress = getProgress(sections);
-
-  useEffect(() => {
-    markPageVisited(location.pathname);
-  }, [location.pathname, markPageVisited]);
-
+const ProgressIndicator = ({ totalSteps, currentStep, completedSteps = [], className }: ProgressIndicatorProps) => {
   return (
-    <div className="mt-8 mb-4">
-      <div className="flex items-center">
-        <span className="text-sm font-medium text-gray-700">
-          Knowledge Progress
-        </span>
-        <span className="ml-auto text-sm font-medium text-primary">
-          {Math.round(progress)}%
-        </span>
-      </div>
-      <div className="mt-2 h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+    <div className={cn("flex items-center space-x-2", className)}>
+      {Array.from({ length: totalSteps }, (_, index) => {
+        const stepNumber = index + 1;
+        const isCompleted = completedSteps.includes(stepNumber) || stepNumber < currentStep;
+        const isCurrent = stepNumber === currentStep;
+        
+        return (
+          <div key={stepNumber} className="flex items-center">
+            <div className={cn(
+              "flex items-center justify-center w-8 h-8 rounded-full border-2",
+              isCompleted && "bg-green-500 border-green-500 text-white",
+              isCurrent && !isCompleted && "border-blue-500 text-blue-500",
+              !isCompleted && !isCurrent && "border-gray-300 text-gray-300"
+            )}>
+              {isCompleted ? (
+                <CheckCircle className="w-4 h-4" />
+              ) : (
+                <Circle className="w-4 h-4" />
+              )}
+            </div>
+            {stepNumber < totalSteps && (
+              <div className={cn(
+                "w-8 h-0.5 mx-2",
+                stepNumber < currentStep ? "bg-green-500" : "bg-gray-300"
+              )} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

@@ -1,294 +1,136 @@
 
-import React, { useState, useEffect } from 'react';
-import { googleDriveService, GoogleDriveFile } from '@/services/googleDriveService';
-import { Folder, File, ChevronRight, Download, Eye, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Folder, FolderOpen, File, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbList } from '@/components/ui/breadcrumb';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { googleDriveService, GoogleDriveFile } from '@/services/googleDriveService';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface GoogleDriveBrowserProps {
-  initialFolderId?: string;
   onFileSelect?: (file: GoogleDriveFile) => void;
   onFolderSelect?: (folder: GoogleDriveFile) => void;
-  onlyFolders?: boolean;
-  onlyFiles?: boolean;
+  selectionMode?: 'files' | 'folders' | 'both';
   allowedMimeTypes?: string[];
-  className?: string;
 }
 
-interface BreadcrumbItem {
-  id: string;
-  name: string;
-}
-
-const isFolder = (file: GoogleDriveFile) => file.mimeType === 'application/vnd.google-apps.folder';
-
-const GoogleDriveBrowser: React.FC<GoogleDriveBrowserProps> = ({
-  initialFolderId = '1ULtJBBqNdJXHadeW0RfBpvYqRvV2VOTi',
-  onFileSelect,
-  onFolderSelect,
-  onlyFolders = false,
-  onlyFiles = false,
-  allowedMimeTypes,
-  className
-}) => {
+const GoogleDriveBrowser = ({ 
+  onFileSelect, 
+  onFolderSelect, 
+  selectionMode = 'both',
+  allowedMimeTypes = []
+}: GoogleDriveBrowserProps) => {
   const [files, setFiles] = useState<GoogleDriveFile[]>([]);
-  const [currentFolder, setCurrentFolder] = useState<string>(initialFolderId);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [detailedError, setDetailedError] = useState<any>(null);
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ id: initialFolderId, name: 'Root' }]);
+  const [currentFolderId, setCurrentFolderId] = useState<string>('');
+  const [folderHistory, setFolderHistory] = useState<Array<{id: string, name: string}>>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const loadFiles = async (folderId: string) => {
-    console.log(`Loading files from folder: ${folderId}`);
+  const loadFiles = async (folderId?: string) => {
     setLoading(true);
-    setError(null);
-    setDetailedError(null);
-    
     try {
-      const response = await googleDriveService.listFiles(folderId);
-      console.log('Files loaded successfully:', response);
-      
-      // Initialize filtered files with an empty array if response.files is undefined
-      let filteredFiles = response.files || [];
-      console.log(`Got ${filteredFiles.length} files before filtering`);
-      
-      if (onlyFolders) {
-        filteredFiles = filteredFiles.filter(file => isFolder(file));
-        console.log(`After folder filter: ${filteredFiles.length} files`);
-      } else if (onlyFiles) {
-        filteredFiles = filteredFiles.filter(file => !isFolder(file));
-        console.log(`After file filter: ${filteredFiles.length} files`);
-      }
-      
-      if (allowedMimeTypes && allowedMimeTypes.length > 0) {
-        filteredFiles = filteredFiles.filter(file => {
-          // Safety check for file.mimeType
-          if (!file.mimeType) return isFolder(file); // Keep folders or treat undefined as allowed
-          
-          return allowedMimeTypes.some(mimeType => 
-            file.mimeType === mimeType || file.mimeType.startsWith(mimeType + '.')
-          ) || isFolder(file); // Always keep folders
-        });
-        console.log(`After mime type filter: ${filteredFiles.length} files`);
-      }
-      
-      setFiles(filteredFiles);
-      setCurrentFolder(response.currentFolderId || folderId);
-    } catch (err: any) {
-      console.error('Error loading files:', err);
-      setError(err.message || 'Failed to load files from Google Drive');
-      setDetailedError(err);
+      const result = await googleDriveService.listFiles(folderId);
+      setFiles(result.files);
+      setCurrentFolderId(result.currentFolderId);
+    } catch (error: any) {
       toast({
         title: 'Error loading files',
-        description: err.message || 'Failed to load files from Google Drive',
+        description: error.message || 'Failed to load Google Drive files',
         variant: 'destructive',
       });
-      // Set files to empty array on error to prevent undefined access
-      setFiles([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileClick = (file: GoogleDriveFile) => {
-    if (isFolder(file)) {
-      setCurrentFolder(file.id);
-      setBreadcrumbs([...breadcrumbs, { id: file.id, name: file.name }]);
-      loadFiles(file.id);
-      if (onFolderSelect) {
-        onFolderSelect(file);
-      }
-    } else if (onFileSelect) {
-      onFileSelect(file);
-    }
-  };
-
-  const navigateToFolder = (index: number) => {
-    const newBreadcrumbs = breadcrumbs.slice(0, index + 1);
-    setBreadcrumbs(newBreadcrumbs);
-    const folderId = newBreadcrumbs[index].id;
-    setCurrentFolder(folderId);
-    loadFiles(folderId);
-  };
-
-  const navigateUp = () => {
-    if (breadcrumbs.length > 1) {
-      const newBreadcrumbs = breadcrumbs.slice(0, breadcrumbs.length - 1);
-      setBreadcrumbs(newBreadcrumbs);
-      const folderId = newBreadcrumbs[newBreadcrumbs.length - 1].id;
-      setCurrentFolder(folderId);
-      loadFiles(folderId);
-    }
-  };
-
-  const retryLoading = () => {
-    loadFiles(currentFolder);
-  };
-
   useEffect(() => {
-    console.log(`Initial loading of files from ${initialFolderId}`);
-    loadFiles(initialFolderId);
-  }, [initialFolderId]);
+    loadFiles();
+  }, []);
+
+  const handleFolderClick = (folder: GoogleDriveFile) => {
+    setFolderHistory(prev => [...prev, { id: currentFolderId, name: 'Previous' }]);
+    loadFiles(folder.id);
+  };
+
+  const handleBackClick = () => {
+    const previous = folderHistory[folderHistory.length - 1];
+    if (previous) {
+      setFolderHistory(prev => prev.slice(0, -1));
+      loadFiles(previous.id || undefined);
+    }
+  };
+
+  const handleItemSelect = (item: GoogleDriveFile) => {
+    const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+    
+    if (isFolder) {
+      if (selectionMode === 'folders' || selectionMode === 'both') {
+        onFolderSelect?.(item);
+      } else {
+        handleFolderClick(item);
+      }
+    } else {
+      if (selectionMode === 'files' || selectionMode === 'both') {
+        if (allowedMimeTypes.length === 0 || allowedMimeTypes.includes(item.mimeType)) {
+          onFileSelect?.(item);
+        } else {
+          toast({
+            title: 'File type not allowed',
+            description: `Only ${allowedMimeTypes.join(', ')} files are allowed`,
+            variant: 'destructive',
+          });
+        }
+      }
+    }
+  };
+
+  const isFolder = (mimeType: string) => mimeType === 'application/vnd.google-apps.folder';
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <div className="flex items-center justify-between">
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((breadcrumb, index) => (
-              <React.Fragment key={breadcrumb.id}>
-                {index > 0 && <BreadcrumbSeparator />}
-                <BreadcrumbItem>
-                  <BreadcrumbLink onClick={() => navigateToFolder(index)} className="cursor-pointer">
-                    {breadcrumb.name}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <div className="flex gap-2">
-          {breadcrumbs.length > 1 && (
-            <Button variant="outline" size="sm" onClick={navigateUp}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Up
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Google Drive Browser</CardTitle>
+            <CardDescription>Select files from your Google Drive</CardDescription>
+          </div>
+          {folderHistory.length > 0 && (
+            <Button variant="outline" onClick={handleBackClick}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={retryLoading} disabled={loading}>
-            {loading ? 'Loading...' : 'Refresh'}
-          </Button>
         </div>
-      </div>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error loading files</AlertTitle>
-          <AlertDescription className="space-y-2">
-            <p>{error}</p>
-            {detailedError && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-sm">Show technical details</summary>
-                <pre className="mt-2 whitespace-pre-wrap text-xs p-2 bg-gray-100 dark:bg-gray-900 rounded-md overflow-auto max-h-[200px]">
-                  {JSON.stringify(detailedError, null, 2)}
-                </pre>
-              </details>
-            )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={retryLoading}
-              className="mt-2"
-            >
-              Try Again
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      </CardHeader>
+      <CardContent>
         {loading ? (
-          Array(6).fill(0).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <Skeleton className="h-10 w-10 rounded-md" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-3 w-[150px]" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : files.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            No files found in this folder
-          </div>
+          <div className="text-center py-8">Loading...</div>
         ) : (
-          files.map((file) => (
-            <Card 
-              key={file.id} 
-              className={cn(
-                "cursor-pointer hover:border-primary/50 transition-colors overflow-hidden",
-                !isFolder(file) && onFileSelect ? "hover:bg-muted/50" : ""
-              )}
-              onClick={() => handleFileClick(file)}
-            >
-              <CardContent className="p-0">
-                <div className="p-4">
-                  <div className="flex items-start">
-                    <div className="mr-3 mt-1">
-                      {isFolder(file) ? (
-                        <Folder className="h-10 w-10 text-blue-500" />
-                      ) : (
-                        <File className="h-10 w-10 text-gray-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium truncate" title={file.name}>{file.name}</h3>
-                      </div>
-                      
-                      <div className="mt-1 flex flex-wrap gap-1 text-xs text-muted-foreground">
-                        {file.modifiedTime && (
-                          <span title={new Date(file.modifiedTime).toLocaleString()}>
-                            {new Date(file.modifiedTime).toLocaleDateString()}
-                          </span>
-                        )}
-                        
-                        {file.size && (
-                          <>
-                            <span>•</span>
-                            <span>
-                              {parseInt(file.size) < 1024 * 1024 
-                                ? `${Math.round(parseInt(file.size) / 1024)} KB` 
-                                : `${Math.round(parseInt(file.size) / 1024 / 1024 * 10) / 10} MB`}
-                            </span>
-                          </>
-                        )}
-                        
-                        {!isFolder(file) && file.mimeType && (
-                          <>
-                            <span>•</span>
-                            <Badge variant="outline" className="h-5 px-1">
-                              {file.mimeType.split('/').pop()?.toUpperCase() || 'FILE'}
-                            </Badge>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {isFolder(file) ? (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    ) : file.webViewLink ? (
-                      <a 
-                        href={file.webViewLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <Eye className="h-5 w-5" />
-                      </a>
-                    ) : null}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {files.map((file) => (
+              <Card 
+                key={file.id} 
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => handleItemSelect(file)}
+              >
+                <CardContent className="p-4 flex items-center space-x-3">
+                  {isFolder(file.mimeType) ? (
+                    <Folder className="w-8 h-8 text-blue-500" />
+                  ) : (
+                    <File className="w-8 h-8 text-gray-500" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isFolder(file.mimeType) ? 'Folder' : file.mimeType.split('/').pop()}
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

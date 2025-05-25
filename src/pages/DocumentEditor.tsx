@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import DocumentEditorToolbar from '@/components/document/DocumentEditorToolbar';
