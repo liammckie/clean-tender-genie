@@ -1,63 +1,67 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
-import ThemeSwitcher from '../common/ThemeSwitcher';
+
+import { useState } from 'react';
+import { Bell, Settings, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
+  const [notifications] = useState(3);
+
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm border-b sticky top-0 z-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-primary dark:text-primary">
-                OpenAI Knowledge Base
-              </h1>
-            </Link>
-          </div>
-          <nav className="hidden md:flex space-x-8">
-            <Link
-              to="/"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/rfts"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              RFT Tasks
-            </Link>
-            <Link
-              to="/dms"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              DMS
-            </Link>
-            <Link
-              to="/reports"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Reports
-            </Link>
-            <Link
-              to="/admin"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Admin
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <ThemeSwitcher />
-            <div className="md:hidden">
-              <button className="bg-white dark:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300">
-                <ChevronDown />
-              </button>
-            </div>
-          </div>
+    <nav className="bg-spotify-black border-b border-spotify-darkgray px-6 py-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-semibold text-white">RFT Assistant</h1>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5 text-spotify-lightgray" />
+            {notifications > 0 && (
+              <span className="absolute -top-1 -right-1 bg-spotify-green text-black text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {notifications}
+              </span>
+            )}
+          </Button>
+
+          {/* Settings */}
+          <Button variant="ghost" size="icon">
+            <Settings className="h-5 w-5 text-spotify-lightgray" />
+          </Button>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5 text-spotify-lightgray" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-spotify-darkgray border-spotify-gray">
+              <DropdownMenuLabel className="text-white">My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-spotify-gray" />
+              <DropdownMenuItem className="text-spotify-lightgray hover:text-white">
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-spotify-lightgray hover:text-white">
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-spotify-gray" />
+              <DropdownMenuItem className="text-spotify-lightgray hover:text-white">
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };
 

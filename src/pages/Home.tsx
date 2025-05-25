@@ -1,93 +1,104 @@
 
-import React from 'react';
-import Layout from '../components/layout/Layout';
-import { useNavigate } from 'react-router-dom';
-import { FileText, FolderOpen, BarChart3, PlusSquare } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState } from 'react';
+import Layout from '@/components/layout/Layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { FileText, Plus, Clock, TrendingUp } from 'lucide-react';
 
 const Home = () => {
-  const navigate = useNavigate();
-  
-  const features = [
-    {
-      title: 'Document Editor',
-      description: 'Create and edit documents with AI assistance.',
-      icon: <PlusSquare size={24} className="text-spotify-green" />,
-      path: '/document-editor',
-    },
-    {
-      title: 'RFT Dashboard',
-      description: 'Manage all your Request for Tender tasks.',
-      icon: <FileText size={24} className="text-spotify-green" />,
-      path: '/rfts',
-    },
-    {
-      title: 'Document Management',
-      description: 'Access and organize your controlled documents.',
-      icon: <FolderOpen size={24} className="text-spotify-green" />,
-      path: '/dms',
-    },
-    {
-      title: 'Reports',
-      description: 'View analytics about your RFT responses.',
-      icon: <BarChart3 size={24} className="text-spotify-green" />,
-      path: '/reports',
-    },
-  ];
+  const [recentActivity] = useState([
+    { id: 1, title: 'RFT Response - Commercial Cleaning', status: 'In Progress', date: '2024-01-15' },
+    { id: 2, title: 'Office Building Maintenance RFT', status: 'Completed', date: '2024-01-14' },
+    { id: 3, title: 'Hospital Cleaning Services', status: 'Draft', date: '2024-01-13' }
+  ]);
 
   return (
     <Layout>
-      <div className="space-y-8 max-w-6xl mx-auto">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-white">
-            RFT Response Generation Assistant
-          </h1>
-          <p className="text-spotify-lightgray text-xl max-w-3xl">
-            Generate professional responses for Request for Tender documents with AI assistance.
-          </p>
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome to RFT Assistant</h1>
+          <p className="text-spotify-lightgray">Streamline your tender response process with AI-powered assistance.</p>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          {features.map((feature) => (
-            <Card 
-              key={feature.title} 
-              className="bg-spotify-darkgray border-none hover:bg-[#282828] transition-all duration-300 cursor-pointer"
-              onClick={() => navigate(feature.path)}
-            >
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center mb-4">
-                  {feature.icon}
-                  <h2 className="text-xl font-semibold text-white ml-3">
-                    {feature.title}
-                  </h2>
-                </div>
-                <p className="text-spotify-lightgray mb-6">
-                  {feature.description}
-                </p>
-                <div className="mt-auto">
-                  <Button 
-                    className="bg-spotify-black hover:bg-[#1c1c1c] text-white border border-[#333333]"
-                    onClick={() => navigate(feature.path)}
-                  >
-                    Open {feature.title}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-spotify-darkgray border-spotify-gray">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <Plus className="h-5 w-5 mr-2 text-spotify-green" />
+                New RFT Response
+              </CardTitle>
+              <CardDescription className="text-spotify-lightgray">
+                Start a new tender response with AI assistance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Get Started</Button>
+            </CardContent>
+          </Card>
 
-        {/* Recent Activity Section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-4">Recent Activity</h2>
-          <Card className="bg-spotify-darkgray border-none">
-            <CardContent className="p-6">
-              <p className="text-spotify-lightgray">No recent activities found. Start by creating a new document or RFT task.</p>
+          <Card className="bg-spotify-darkgray border-spotify-gray">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <FileText className="h-5 w-5 mr-2 text-spotify-green" />
+                Document Library
+              </CardTitle>
+              <CardDescription className="text-spotify-lightgray">
+                Access your document management system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">Browse Documents</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-spotify-darkgray border-spotify-gray">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <TrendingUp className="h-5 w-5 mr-2 text-spotify-green" />
+                Analytics
+              </CardTitle>
+              <CardDescription className="text-spotify-lightgray">
+                View your tender response performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">View Reports</Button>
             </CardContent>
           </Card>
         </div>
+
+        <Card className="bg-spotify-darkgray border-spotify-gray">
+          <CardHeader>
+            <CardTitle className="text-white">Recent Activity</CardTitle>
+            <CardDescription className="text-spotify-lightgray">
+              Your latest tender responses and updates
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-3 bg-spotify-black rounded-md">
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 text-spotify-lightgray mr-3" />
+                    <div>
+                      <p className="text-white font-medium">{item.title}</p>
+                      <p className="text-spotify-lightgray text-sm">{item.date}</p>
+                    </div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs ${
+                    item.status === 'Completed' 
+                      ? 'bg-green-500/20 text-green-400' 
+                      : item.status === 'In Progress'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {item.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );

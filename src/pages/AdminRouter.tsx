@@ -1,24 +1,24 @@
 
-import React from 'react';
-import Layout from '../components/layout/Layout';
-import { Outlet, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import AdminDashboard from './AdminDashboard';
+import Layout from '@/components/layout/Layout';
 
-const AdminRouter = () => (
-  <Layout>
-    <h2 className="text-2xl font-bold mb-4">Admin Panel</h2>
+const AdminRouter = () => {
+  return (
     <Routes>
-      <Route path="/" element={<AdminDashboard />} />
-      <Route path="*" element={<Outlet />} />
+      <Route index element={<AdminDashboard />} />
+      <Route path="dashboard" element={<AdminDashboard />} />
+      <Route path="*" element={
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-white">Admin Page Not Found</h1>
+            <p className="text-spotify-lightgray mt-4">The requested admin page could not be found.</p>
+          </div>
+        </Layout>
+      } />
     </Routes>
-  </Layout>
-);
-
-// Simple placeholder component for the admin dashboard
-const AdminDashboard = () => (
-  <div className="p-4 bg-spotify-darkgray rounded-md">
-    <h3 className="text-xl mb-3">Admin Dashboard</h3>
-    <p className="text-spotify-lightgray">Welcome to the admin dashboard. Use the sidebar to navigate to different admin sections.</p>
-  </div>
-);
+  );
+};
 
 export default AdminRouter;
