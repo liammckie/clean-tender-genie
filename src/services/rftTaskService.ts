@@ -26,7 +26,7 @@ export const rftTaskService = {
         data?.map((row: any) => ({
           id: row.id,
           name: row.name,
-          status: row.status,
+          status: row.status as 'pending' | 'processing' | 'completed' | 'failed',
           createdAt: row.created_at,
           updatedAt: row.updated_at,
           rftFileId: row.rft_file_id ?? undefined,
@@ -54,7 +54,7 @@ export const rftTaskService = {
       return {
         id: data.id,
         name: data.name,
-        status: data.status,
+        status: data.status as 'pending' | 'processing' | 'completed' | 'failed',
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         rftFileId: data.rft_file_id ?? undefined,

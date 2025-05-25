@@ -1,8 +1,6 @@
 
-import { FunctionsResponse } from '@supabase/supabase-js';
-
 export function handleSupabaseResponse<T>(
-  response: FunctionsResponse<T>,
+  response: { data: T | null; error: any },
   errorMessage: string,
 ): T {
   if (response.error) {

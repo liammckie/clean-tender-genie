@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { Home, FileText, FolderOpen, BarChart3, Settings, PlusSquare, Search, Cloud } from 'lucide-react';
 import ThemeSwitcher from '../common/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 
 const AppSidebar = () => {
-  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
   const menuItems = [

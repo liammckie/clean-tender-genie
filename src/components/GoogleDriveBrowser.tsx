@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Folder, FolderOpen, File, ArrowLeft } from 'lucide-react';
+import { Folder, File, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { googleDriveService, GoogleDriveFile } from '@/services/googleDriveService';
@@ -11,30 +11,40 @@ interface GoogleDriveBrowserProps {
   onFolderSelect?: (folder: GoogleDriveFile) => void;
   selectionMode?: 'files' | 'folders' | 'both';
   allowedMimeTypes?: string[];
+  initialFolderId?: string;
+  onlyFiles?: boolean;
+  onlyFolders?: boolean;
 }
 
 const GoogleDriveBrowser = ({ 
   onFileSelect, 
   onFolderSelect, 
   selectionMode = 'both',
-  allowedMimeTypes = []
+  allowedMimeTypes = [],
+  initialFolderId,
+  onlyFiles = false,
+  onlyFolders = false
 }: GoogleDriveBrowserProps) => {
   const [files, setFiles] = useState<GoogleDriveFile[]>([]);
-  const [currentFolderId, setCurrentFolderId] = useState<string>('');
+  const [currentFolderId, setCurrentFolderId] = useState<string>(initialFolderId || '');
   const [folderHistory, setFolderHistory] = useState<Array<{id: string, name: string}>>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const loadFiles = async (folderId?: string) => {
     setLoading(true);
+    setError(null);
     try {
       const result = await googleDriveService.listFiles(folderId);
       setFiles(result.files);
       setCurrentFolderId(result.currentFolderId);
     } catch (error: any) {
+      const errorMessage = error.message || 'Failed to load Google Drive files';
+      setError(errorMessage);
       toast({
         title: 'Error loading files',
-        description: error.message || 'Failed to load Google Drive files',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -43,8 +53,8 @@ const GoogleDriveBrowser = ({
   };
 
   useEffect(() => {
-    loadFiles();
-  }, []);
+    loadFiles(initialFolderId);
+  }, [initialFolderId]);
 
   const handleFolderClick = (folder: GoogleDriveFile) => {
     setFolderHistory(prev => [...prev, { id: currentFolderId, name: 'Previous' }]);
@@ -63,13 +73,13 @@ const GoogleDriveBrowser = ({
     const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
     
     if (isFolder) {
-      if (selectionMode === 'folders' || selectionMode === 'both') {
+      if (onlyFolders || selectionMode === 'folders' || selectionMode === 'both') {
         onFolderSelect?.(item);
       } else {
         handleFolderClick(item);
       }
     } else {
-      if (selectionMode === 'files' || selectionMode === 'both') {
+      if (onlyFiles || selectionMode === 'files' || selectionMode === 'both') {
         if (allowedMimeTypes.length === 0 || allowedMimeTypes.includes(item.mimeType)) {
           onFileSelect?.(item);
         } else {
@@ -83,7 +93,25 @@ const GoogleDriveBrowser = ({
     }
   };
 
+  const handleRetry = () => {
+    loadFiles(currentFolderId);
+  };
+
   const isFolder = (mimeType: string) => mimeType === 'application/vnd.google-apps.folder';
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleRetry}>Try Again</Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -104,6 +132,8 @@ const GoogleDriveBrowser = ({
       <CardContent>
         {loading ? (
           <div className="text-center py-8">Loading...</div>
+        ) : files.length === 0 ? (
+          <div className="text-center py-8">No files found in this folder</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {files.map((file) => (
