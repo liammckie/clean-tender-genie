@@ -1,16 +1,52 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, FileText, Clock, CheckCircle } from 'lucide-react';
+import { rftTaskService, RftTask } from '@/services/rftTaskService';
 
 const Dashboard = () => {
-  const [dashboardData] = useState({
-    activeRFTs: 12,
-    completedThisMonth: 8,
-    pendingReview: 3,
-    averageTime: '2.5 days'
-  });
+  const [tasks, setTasks] = useState<RftTask[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const taskList = await rftTaskService.listTasks();
+        setTasks(taskList);
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTasks();
+  }, []);
+
+  const dashboardData = {
+    activeRFTs: tasks.filter(task => task.status === 'processing').length,
+    completedThisMonth: tasks.filter(task => {
+      const createdDate = new Date(task.createdAt);
+      const now = new Date();
+      return task.status === 'completed' && 
+             createdDate.getMonth() === now.getMonth() && 
+             createdDate.getFullYear() === now.getFullYear();
+    }).length,
+    pendingReview: tasks.filter(task => task.status === 'pending').length,
+    averageTime: '2.5 days' // This would be calculated from actual data in a real implementation
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
+          <div className="text-white">Loading...</div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

@@ -1,79 +1,93 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Home, FileText, FolderOpen, BarChart3, Settings, PlusSquare, Search, Cloud } from 'lucide-react';
-import ThemeSwitcher from '../common/ThemeSwitcher';
+
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { 
+  Home, 
+  FileText, 
+  Settings, 
+  Users, 
+  LogOut,
+  FolderOpen,
+  BarChart3
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const AppSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const { user, signOut } = useAuth();
 
-  const menuItems = [
-    { name: 'Home', path: '/', icon: <Home size={20} /> },
-    { name: 'RFT Tasks', path: '/rfts', icon: <FileText size={20} /> },
-    { name: 'Document Editor', path: '/document-editor', icon: <PlusSquare size={20} /> },
-    { name: 'DMS', path: '/dms', icon: <FolderOpen size={20} /> },
-    { name: 'Google Drive', path: '/google-drive', icon: <Cloud size={20} /> },
-    { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} /> },
-    { name: 'Admin', path: '/admin', icon: <Settings size={20} /> },
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'RFT Tasks', href: '/rfts', icon: FileText },
+    { name: 'Document Management', href: '/dms', icon: FolderOpen },
+    { name: 'Google Drive', href: '/google-drive', icon: FolderOpen },
+    { name: 'Reports', href: '/reports', icon: BarChart3 },
+    { name: 'Admin', href: '/admin', icon: Settings },
   ];
 
-  return (
-    <aside className={cn(
-      "min-h-screen bg-spotify-black text-white flex flex-col",
-      collapsed ? "w-20" : "w-64",
-      "transition-width duration-300 ease-in-out"
-    )}>
-      {/* Logo area */}
-      <div className="p-6 flex justify-between items-center">
-        {!collapsed && (
-          <span className="text-xl font-bold">RFT Assistant</span>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-full hover:bg-spotify-darkgray"
-        >
-          {collapsed ? "→" : "←"}
-        </button>
-      </div>
+  if (!user) {
+    return null;
+  }
 
-      {/* Search (visual only) */}
-      {!collapsed && (
-        <div className="px-6 mb-4">
-          <div className="bg-spotify-darkgray rounded-full p-2 flex items-center">
-            <Search size={18} className="text-spotify-lightgray mr-2" />
-            <span className="text-spotify-lightgray">Search...</span>
+  return (
+    <div className="flex flex-col w-64 bg-spotify-darkgray border-r border-spotify-gray">
+      <div className="flex items-center justify-center h-16 px-4 border-b border-spotify-gray">
+        <h1 className="text-xl font-bold text-white">RFT Generator</h1>
+      </div>
+      
+      <nav className="flex-1 px-4 py-6 space-y-2">
+        {navigation.map((item) => {
+          const isActive = location.pathname === item.href || 
+                          (item.href !== '/' && location.pathname.startsWith(item.href));
+          
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={cn(
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-spotify-green text-black"
+                  : "text-spotify-lightgray hover:bg-spotify-gray hover:text-white"
+              )}
+            >
+              <item.icon className="mr-3 h-5 w-5" />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
+      
+      <div className="p-4 border-t border-spotify-gray">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm font-medium text-white truncate">
+              {user.email}
+            </p>
+            <p className="text-xs text-spotify-lightgray">User</p>
           </div>
         </div>
-      )}
-
-      {/* Navigation items */}
-      <nav className="flex-1 px-3">
-        <ul className="space-y-1">
-          {menuItems.map((item) => (
-            <li key={item.name}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => cn(
-                  "flex items-center p-3 rounded-md transition-colors",
-                  isActive 
-                    ? "bg-spotify-darkgray text-spotify-green" 
-                    : "text-spotify-lightgray hover:text-white",
-                  collapsed ? "justify-center" : "px-4"
-                )}
-              >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {!collapsed && <span className="ml-3">{item.name}</span>}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Bottom section */}
-      <div className="p-4 border-t border-spotify-darkgray flex items-center justify-center">
-        <ThemeSwitcher />
+        <Button
+          onClick={handleSignOut}
+          variant="outline"
+          className="w-full"
+          size="sm"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign Out
+        </Button>
       </div>
-    </aside>
+    </div>
   );
 };
 

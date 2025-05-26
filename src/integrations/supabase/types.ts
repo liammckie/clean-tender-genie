@@ -9,36 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       rft_tasks: {
         Row: {
           created_at: string
+          description: string | null
           due_date: string | null
+          file_path: string | null
           id: string
           name: string
           output_file_id: string | null
+          progress: Json | null
+          requirements: Json | null
+          response_path: string | null
           rft_file_id: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           due_date?: string | null
+          file_path?: string | null
           id?: string
           name: string
           output_file_id?: string | null
+          progress?: Json | null
+          requirements?: Json | null
+          response_path?: string | null
           rft_file_id?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           due_date?: string | null
+          file_path?: string | null
           id?: string
           name?: string
           output_file_id?: string | null
+          progress?: Json | null
+          requirements?: Json | null
+          response_path?: string | null
           rft_file_id?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

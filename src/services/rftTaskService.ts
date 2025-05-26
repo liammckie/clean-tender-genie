@@ -10,6 +10,18 @@ export interface RftTask {
   rftFileId?: string;
   outputFileId?: string;
   dueDate?: string;
+  description?: string;
+  requirements?: any;
+  progress?: {
+    parsing: boolean;
+    analysis: boolean;
+    drafting: boolean;
+    validation: boolean;
+    formatting: boolean;
+  };
+  filePath?: string;
+  responsePath?: string;
+  userId?: string;
 }
 
 export const rftTaskService = {
@@ -32,6 +44,12 @@ export const rftTaskService = {
           rftFileId: row.rft_file_id ?? undefined,
           outputFileId: row.output_file_id ?? undefined,
           dueDate: row.due_date ?? undefined,
+          description: row.description ?? undefined,
+          requirements: row.requirements ?? undefined,
+          progress: row.progress ?? undefined,
+          filePath: row.file_path ?? undefined,
+          responsePath: row.response_path ?? undefined,
+          userId: row.user_id ?? undefined,
         })) || []
       );
     } catch (error) {
@@ -60,9 +78,111 @@ export const rftTaskService = {
         rftFileId: data.rft_file_id ?? undefined,
         outputFileId: data.output_file_id ?? undefined,
         dueDate: data.due_date ?? undefined,
+        description: data.description ?? undefined,
+        requirements: data.requirements ?? undefined,
+        progress: data.progress ?? undefined,
+        filePath: data.file_path ?? undefined,
+        responsePath: data.response_path ?? undefined,
+        userId: data.user_id ?? undefined,
       };
     } catch (error) {
       console.error(`Error fetching task with ID ${taskId}:`, error);
+      throw error;
+    }
+  },
+
+  async createTask(task: Partial<RftTask>): Promise<RftTask> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('rft_tasks')
+        .insert([{
+          name: task.name,
+          description: task.description,
+          due_date: task.dueDate,
+          status: task.status || 'pending',
+          user_id: user.id,
+          rft_file_id: task.rftFileId,
+          file_path: task.filePath,
+          progress: task.progress || {
+            parsing: false,
+            analysis: false,
+            drafting: false,
+            validation: false,
+            formatting: false
+          }
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: data.id,
+        name: data.name,
+        status: data.status,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        rftFileId: data.rft_file_id ?? undefined,
+        outputFileId: data.output_file_id ?? undefined,
+        dueDate: data.due_date ?? undefined,
+        description: data.description ?? undefined,
+        requirements: data.requirements ?? undefined,
+        progress: data.progress ?? undefined,
+        filePath: data.file_path ?? undefined,
+        responsePath: data.response_path ?? undefined,
+        userId: data.user_id ?? undefined,
+      };
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
+    }
+  },
+
+  async updateTask(taskId: string, updates: Partial<RftTask>): Promise<RftTask> {
+    try {
+      const updateData: any = {};
+      
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate;
+      if (updates.rftFileId !== undefined) updateData.rft_file_id = updates.rftFileId;
+      if (updates.outputFileId !== undefined) updateData.output_file_id = updates.outputFileId;
+      if (updates.filePath !== undefined) updateData.file_path = updates.filePath;
+      if (updates.responsePath !== undefined) updateData.response_path = updates.responsePath;
+      if (updates.requirements !== undefined) updateData.requirements = updates.requirements;
+      if (updates.progress !== undefined) updateData.progress = updates.progress;
+
+      const { data, error } = await supabase
+        .from('rft_tasks')
+        .update(updateData)
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: data.id,
+        name: data.name,
+        status: data.status,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        rftFileId: data.rft_file_id ?? undefined,
+        outputFileId: data.output_file_id ?? undefined,
+        dueDate: data.due_date ?? undefined,
+        description: data.description ?? undefined,
+        requirements: data.requirements ?? undefined,
+        progress: data.progress ?? undefined,
+        filePath: data.file_path ?? undefined,
+        responsePath: data.response_path ?? undefined,
+        userId: data.user_id ?? undefined,
+      };
+    } catch (error) {
+      console.error('Error updating task:', error);
       throw error;
     }
   },
