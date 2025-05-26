@@ -24,6 +24,16 @@ export interface RftTask {
   userId?: string;
 }
 
+type TaskStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+interface TaskProgress {
+  parsing: boolean;
+  analysis: boolean;
+  drafting: boolean;
+  validation: boolean;
+  formatting: boolean;
+}
+
 export const rftTaskService = {
   async listTasks(): Promise<RftTask[]> {
     try {
@@ -38,7 +48,7 @@ export const rftTaskService = {
         data?.map((row: any) => ({
           id: row.id,
           name: row.name,
-          status: row.status as 'pending' | 'processing' | 'completed' | 'failed',
+          status: row.status as TaskStatus,
           createdAt: row.created_at,
           updatedAt: row.updated_at,
           rftFileId: row.rft_file_id ?? undefined,
@@ -46,7 +56,7 @@ export const rftTaskService = {
           dueDate: row.due_date ?? undefined,
           description: row.description ?? undefined,
           requirements: row.requirements ?? undefined,
-          progress: row.progress ?? undefined,
+          progress: row.progress as TaskProgress ?? undefined,
           filePath: row.file_path ?? undefined,
           responsePath: row.response_path ?? undefined,
           userId: row.user_id ?? undefined,
@@ -72,7 +82,7 @@ export const rftTaskService = {
       return {
         id: data.id,
         name: data.name,
-        status: data.status as 'pending' | 'processing' | 'completed' | 'failed',
+        status: data.status as TaskStatus,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         rftFileId: data.rft_file_id ?? undefined,
@@ -80,7 +90,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress ?? undefined,
+        progress: data.progress as TaskProgress ?? undefined,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,
@@ -96,9 +106,11 @@ export const rftTaskService = {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      if (!task.name) throw new Error('Task name is required');
+
       const { data, error } = await supabase
         .from('rft_tasks')
-        .insert([{
+        .insert({
           name: task.name,
           description: task.description,
           due_date: task.dueDate,
@@ -113,7 +125,7 @@ export const rftTaskService = {
             validation: false,
             formatting: false
           }
-        }])
+        })
         .select()
         .single();
 
@@ -122,7 +134,7 @@ export const rftTaskService = {
       return {
         id: data.id,
         name: data.name,
-        status: data.status,
+        status: data.status as TaskStatus,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         rftFileId: data.rft_file_id ?? undefined,
@@ -130,7 +142,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress ?? undefined,
+        progress: data.progress as TaskProgress ?? undefined,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,
@@ -168,7 +180,7 @@ export const rftTaskService = {
       return {
         id: data.id,
         name: data.name,
-        status: data.status,
+        status: data.status as TaskStatus,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         rftFileId: data.rft_file_id ?? undefined,
@@ -176,7 +188,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress ?? undefined,
+        progress: data.progress as TaskProgress ?? undefined,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,

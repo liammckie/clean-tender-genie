@@ -1,5 +1,5 @@
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import GoogleDriveBrowser from './GoogleDriveBrowser';
 
@@ -10,7 +10,7 @@ vi.mock('@/services/googleDriveService', () => ({
 
 describe('GoogleDriveBrowser', () => {
   it('renders google drive browser', () => {
-    render(<GoogleDriveBrowser />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    const { getByText } = render(<GoogleDriveBrowser />);
+    expect(getByText(/loading/i)).toBeInTheDocument();
   });
 });
