@@ -34,6 +34,28 @@ interface TaskProgress {
   formatting: boolean;
 }
 
+// Type guard to check if data is valid TaskProgress
+function isValidTaskProgress(data: any): data is TaskProgress {
+  return (
+    data &&
+    typeof data === 'object' &&
+    typeof data.parsing === 'boolean' &&
+    typeof data.analysis === 'boolean' &&
+    typeof data.drafting === 'boolean' &&
+    typeof data.validation === 'boolean' &&
+    typeof data.formatting === 'boolean'
+  );
+}
+
+// Default progress object
+const defaultProgress: TaskProgress = {
+  parsing: false,
+  analysis: false,
+  drafting: false,
+  validation: false,
+  formatting: false
+};
+
 export const rftTaskService = {
   async listTasks(): Promise<RftTask[]> {
     try {
@@ -56,7 +78,7 @@ export const rftTaskService = {
           dueDate: row.due_date ?? undefined,
           description: row.description ?? undefined,
           requirements: row.requirements ?? undefined,
-          progress: row.progress as TaskProgress ?? undefined,
+          progress: isValidTaskProgress(row.progress) ? row.progress : defaultProgress,
           filePath: row.file_path ?? undefined,
           responsePath: row.response_path ?? undefined,
           userId: row.user_id ?? undefined,
@@ -90,7 +112,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress as TaskProgress ?? undefined,
+        progress: isValidTaskProgress(data.progress) ? data.progress : defaultProgress,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,
@@ -118,13 +140,7 @@ export const rftTaskService = {
           user_id: user.id,
           rft_file_id: task.rftFileId,
           file_path: task.filePath,
-          progress: task.progress || {
-            parsing: false,
-            analysis: false,
-            drafting: false,
-            validation: false,
-            formatting: false
-          }
+          progress: task.progress || defaultProgress
         })
         .select()
         .single();
@@ -142,7 +158,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress as TaskProgress ?? undefined,
+        progress: isValidTaskProgress(data.progress) ? data.progress : defaultProgress,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,
@@ -188,7 +204,7 @@ export const rftTaskService = {
         dueDate: data.due_date ?? undefined,
         description: data.description ?? undefined,
         requirements: data.requirements ?? undefined,
-        progress: data.progress as TaskProgress ?? undefined,
+        progress: isValidTaskProgress(data.progress) ? data.progress : defaultProgress,
         filePath: data.file_path ?? undefined,
         responsePath: data.response_path ?? undefined,
         userId: data.user_id ?? undefined,
